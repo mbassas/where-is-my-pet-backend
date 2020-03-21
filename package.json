@@ -1,0 +1,11 @@
+{
+  "name": "where-is-my-pet-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Montserrat Bassas <montsebassas.mb@gmail.com>",
+  "license": "ISC"
+}
