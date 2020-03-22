@@ -1,0 +1,7 @@
+{
+    "dev": {
+        "driver": "sqlite3",
+        "filename": "./database.db"
+    },
+    "sql-file": true
+}
