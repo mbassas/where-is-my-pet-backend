@@ -1,7 +1,13 @@
 {
     "dev": {
-        "driver": "sqlite3",
-        "filename": "./database.db"
+        "driver": "pg",
+        "filename": "./database.db",
+        "user": {
+            "ENV": "DB_USER"
+        },
+        "password": {
+            "ENV": "DB_PASSWORD"
+        }
     },
     "sql-file": true
 }
