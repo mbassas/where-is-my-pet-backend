@@ -1,11 +1,16 @@
 export enum ErrorType {
     INVALID_USERNAME_OR_PASSWORD,
+    USERNAME_ALREADY_EXISTS,
 }
 
 const errorDetails = {
     [ErrorType.INVALID_USERNAME_OR_PASSWORD]: {
         status: 401,
         message: "Invalid credentials",
+    },
+    [ErrorType.USERNAME_ALREADY_EXISTS]: {
+        status: 409,
+        message: "Username already exists",
     },
 }
 

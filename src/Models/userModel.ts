@@ -4,30 +4,39 @@ import insertUserQuery from '../db/queries/users/insert_user';
 import { UserInput, User } from '../Entities/user';
 import getUserByUsernameQuery from '../db/queries/users/get_user_by_username';
 import CustomError, { ErrorType } from './customErrors';
+import JWT from 'jsonwebtoken';
+import config from '../config';
+import getUserByIdQuery from '../db/queries/users/get_user_by_id';
 
 class UserModel {
 
-    public async CreateUser(user: UserInput): Promise<void> {
-        // Validate data
+    public async CreateUser(user: UserInput): Promise<string> {
 
-        // Encrypt Passwd
         const encryptedPassword = await this.EncryptPassword(user.password)
 
-        // Insert into BBDD
-        await runQuery(
-            insertUserQuery,
-            [
-                user.name,
-                user.surname,
-                user.email,
-                user.phone,
-                user.username,
-                encryptedPassword
-            ]
-        );
+        try {
+            const queryResult = await runQuery<User>(
+                insertUserQuery,
+                [
+                    user.name,
+                    user.surname,
+                    user.email,
+                    user.phone,
+                    user.username,
+                    encryptedPassword
+                ]
+            );
+
+            return this.GetToken(queryResult.rows[0]);
+        } catch (e) {
+            if (e.constraint === 'users_username_key') {
+                // If username is duplicated 
+                throw new CustomError(ErrorType.USERNAME_ALREADY_EXISTS);
+            }
+        }
     }
 
-    public async LogInUser(username: string, password: string) {
+    public async LogInUser(username: string, password: string): Promise<string> {
 
         const queryResult = await runQuery<User>(getUserByUsernameQuery, [
             username
@@ -48,7 +57,24 @@ class UserModel {
             throw new CustomError(ErrorType.INVALID_USERNAME_OR_PASSWORD);
         }
 
-        return user;
+        return this.GetToken(user);
+    }
+
+    public GetToken(user: User): string {
+        return JWT.sign(user.id.toString(), config.JWT_SECRET);
+    }
+
+    public async GetUserFromToken(token: string): Promise<User> {
+        const userId = JWT.verify(token, config.JWT_SECRET);
+
+        const queryResult = await runQuery<User>(getUserByIdQuery, [
+            userId
+        ]);
+
+        if (queryResult.rowCount !== 1) {
+            return null;
+        }
+        return queryResult.rows[0];
     }
 
     private EncryptPassword(password: string) {
