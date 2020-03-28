@@ -1,18 +1,16 @@
-import sqlite from "sqlite3";
-import path from "path"
+import pg from 'pg';
+import Config from "../config";
 
-const driver = new sqlite.Database(path.resolve(__dirname, "../../database.db"));
+const pool = new pg.Pool({
+    connectionString: Config.DATABASE_URL,
+});
 
-export function runQuery<T = any>(query: string, params: object): Promise<T[]> {
-    console.log(query, params);
-    return new Promise<T[]>((resolve, reject) => {
-        driver.all(query, params, (err: Error, rows: T[]) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-
-            resolve(rows);
-        })
-    })
+export async function runQuery<T = any>(query: string, params: any[]) {
+    try {
+        const result = await pool.query<T>(query, params)
+        return result;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
 }

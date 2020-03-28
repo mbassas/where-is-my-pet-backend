@@ -9,12 +9,12 @@ const insertUserQuery = `
         password
     ) 
     VALUES (
-        $name,
-        $surname, 
-        $email,
-        $phone, 
-        $username, 
-        $password
+        $1,
+        $2, 
+        $3,
+        $4, 
+        $5, 
+        $6
     );
 `
 export default insertUserQuery;
