@@ -7,22 +7,24 @@ import CustomError, { ErrorType } from './customErrors';
 import JWT from 'jsonwebtoken';
 import config from '../config';
 import getUserByIdQuery from '../db/queries/users/get_user_by_id';
+import crypto from 'crypto';
 
 class UserModel {
 
     public async CreateUser(user: UserInput): Promise<string> {
 
-        const encryptedPassword = await this.EncryptPassword(user.password)
+        const encryptedPassword = await this._encryptPassword(user.password)
+        const encryptedUser = this._encryptUser(user);
 
         try {
             const queryResult = await runQuery<User>(
                 insertUserQuery,
                 [
-                    user.name,
-                    user.surname,
-                    user.email,
-                    user.phone,
-                    user.username,
+                    encryptedUser.name,
+                    encryptedUser.surname,
+                    encryptedUser.email,
+                    encryptedUser.phone,
+                    encryptedUser.username,
                     encryptedPassword
                 ]
             );
@@ -33,13 +35,15 @@ class UserModel {
                 // If username is duplicated 
                 throw new CustomError(ErrorType.USERNAME_ALREADY_EXISTS);
             }
+            console.error(e);
+            throw e;
         }
     }
 
     public async LogInUser(username: string, password: string): Promise<string> {
 
         const queryResult = await runQuery<User>(getUserByUsernameQuery, [
-            username
+            this._encryptData(username)
         ]);
 
         if (queryResult.rowCount !== 1) {
@@ -49,7 +53,6 @@ class UserModel {
 
         const user = queryResult.rows[0];
 
-        const encryptedPassword = await this.EncryptPassword(password);
         const match = await bcrypt.compare(password, user.password);
 
         if (!match) {
@@ -74,11 +77,51 @@ class UserModel {
         if (queryResult.rowCount !== 1) {
             return null;
         }
-        return queryResult.rows[0];
+
+        return this._decryptUser(queryResult.rows[0])
+
     }
 
-    private EncryptPassword(password: string) {
+
+    private _fieldsToEncrypt: Array<keyof UserInput> = ["email", "name", "surname", "username", "phone"]
+    private _encryptUser(user: UserInput): UserInput {
+        let encryptedUser = { ...user };
+        this._fieldsToEncrypt.forEach((field) => {
+            encryptedUser[field] = this._encryptData(user[field]);
+        });
+
+        return encryptedUser;
+    }
+
+    private _decryptUser(user: User): User {
+        let decrypted = { ...user };
+        this._fieldsToEncrypt.forEach((field) => {
+            decrypted[field] = this._decryptData(user[field]);
+        });
+
+        return decrypted;
+    }
+
+    private _encryptPassword(password: string) {
         return bcrypt.hash(password, 10);
+    }
+
+    private _encryptData(data: string): string {
+        const key = crypto.scryptSync("heythere", 'salt', 32);
+        const iv = Buffer.alloc(16, 0);
+        const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+        let encrypted = cipher.update(data, "utf8", "hex");
+        encrypted = encrypted + cipher.final("hex");
+        return encrypted;
+    }
+
+    private _decryptData(data: string): string {
+        const key = crypto.scryptSync("heythere", 'salt', 32);
+        const iv = Buffer.alloc(16, 0);
+        const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
+        let decrypted = decipher.update(data, "hex", "utf8");
+        decrypted = decrypted + decipher.final("utf8");
+        return decrypted;
     }
 }
 

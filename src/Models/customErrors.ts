@@ -24,7 +24,7 @@ class CustomError extends Error {
     }
 
     public getHttpStatusCode(): number {
-        const details = this.getErrorDetails();
+        const details = this._getErrorDetails();
         if (details) {
             return details.status;
         }
@@ -37,7 +37,7 @@ class CustomError extends Error {
             return this.message;
         }
 
-        const details = this.getErrorDetails();
+        const details = this._getErrorDetails();
         if (details) {
             return details.message;
         }
@@ -45,7 +45,7 @@ class CustomError extends Error {
         return "";
     }
 
-    private getErrorDetails() {
+    private _getErrorDetails() {
         if (errorDetails[this.type]) {
             return errorDetails[this.type];
         }
