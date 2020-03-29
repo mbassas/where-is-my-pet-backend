@@ -23,9 +23,9 @@ const signUpBodySchema = Joi.object({
     password: Joi.string().required()
 });
 
-async function signUp({ body }: ApiRequest<UserInput>, res: Response) {
+async function signUp(req: ApiRequest<UserInput>, res: Response) {
     try {
-        const token = await userModel.CreateUser(body);
+        const token = await userModel.CreateUser(req.body);
 
         res.json({ token });
     } catch (e) {
