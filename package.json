@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev": "node -r ts-node/register -r dotenv/config src/index.ts",
+    "dev": "nodemon",
     "prebuild": "rm -rf ./dist",
     "build": "tsc",
     "start": "node dist/index.js",
@@ -29,10 +29,18 @@
     "@types/hapi__joi": "^16.0.12",
     "@types/jsonwebtoken": "^8.3.8",
     "@types/pg": "^7.14.3",
+    "nodemon": "^2.0.2",
     "ts-node": "^8.7.0",
     "typescript": "^3.8.3"
   },
   "engines": {
     "node": "12.x"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "exec": "node -r ts-node/register -r dotenv/config src/index.ts",
+    "ext": "ts"
   }
 }
