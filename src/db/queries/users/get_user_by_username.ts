@@ -1,3 +1,3 @@
-const getUserByUsernameQuery = "SELECT * FROM users WHERE username = $1";
+const getUserByUsernameQuery = "SELECT * FROM users WHERE username_hash = $1";
 
 export default getUserByUsernameQuery;

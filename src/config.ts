@@ -8,6 +8,7 @@ const Config = {
     ALLOWED_ORIGINS: isProduction ? "https://mbassas.github.io/where-is-my-pet-frontend/" : "*",
     AES_PASSWORD: process.env.AES_PASSWORD || "password",
     AES_SALT: process.env.AES_SALT || "salt",
+    HMAC_PASSWORD: process.env.HMAC_PASSWORD || "password"
 
 }
 

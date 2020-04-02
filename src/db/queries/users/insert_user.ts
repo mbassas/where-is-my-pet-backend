@@ -4,8 +4,10 @@ const insertUserQuery = `
         name,
         surname,
         email,
+        email_hash,
         phone,
         username,
+        username_hash,
         password
     ) 
     VALUES (
@@ -14,7 +16,9 @@ const insertUserQuery = `
         $3,
         $4, 
         $5, 
-        $6
+        $6,
+        $7,
+        $8
     )
     RETURNING *
 `

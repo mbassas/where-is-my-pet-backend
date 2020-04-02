@@ -11,6 +11,7 @@ import crypto from 'crypto';
 import Config from '../config';
 
 class UserModel {
+    private _fieldsToEncrypt: Array<keyof UserInput> = ["email", "name", "surname", "username", "phone"]
 
     public async CreateUser(user: UserInput): Promise<string> {
 
@@ -24,13 +25,15 @@ class UserModel {
                     encryptedUser.name,
                     encryptedUser.surname,
                     encryptedUser.email,
+                    this._createHash(user.email),
                     encryptedUser.phone,
                     encryptedUser.username,
+                    this._createHash(user.username),
                     encryptedPassword
                 ]
             );
 
-            return this.GetToken(queryResult.rows[0]);
+            return this._getToken(queryResult.rows[0]);
         } catch (e) {
             if (e.constraint === 'users_username_key') {
                 // If username is duplicated 
@@ -44,7 +47,7 @@ class UserModel {
     public async LogInUser(username: string, password: string): Promise<string> {
 
         const queryResult = await runQuery<User>(getUserByUsernameQuery, [
-            this._encryptData(username)
+            this._createHash(username),
         ]);
 
         if (queryResult.rowCount !== 1) {
@@ -61,13 +64,12 @@ class UserModel {
             throw new CustomError(ErrorType.INVALID_USERNAME_OR_PASSWORD);
         }
 
-        return this.GetToken(user);
+        return this._getToken(user);
     }
 
-    public GetToken(user: User): string {
+    private _getToken(user: User): string {
         return JWT.sign(user.id.toString(), config.JWT_SECRET);
     }
-
     public async GetUserFromToken(token: string): Promise<User> {
         const userId = JWT.verify(token, config.JWT_SECRET);
 
@@ -83,8 +85,7 @@ class UserModel {
 
     }
 
-
-    private _fieldsToEncrypt: Array<keyof UserInput> = ["email", "name", "surname", "username", "phone"]
+    //#region Crypto
     private _encryptUser(user: UserInput): UserInput {
         let encryptedUser = { ...user };
         this._fieldsToEncrypt.forEach((field) => {
@@ -107,6 +108,11 @@ class UserModel {
         return bcrypt.hash(password, 10);
     }
 
+    private _createHash(data: string) {
+        const hmac = crypto.createHmac("sha256", Config.HMAC_PASSWORD);
+
+        return hmac.update(data).digest("hex");
+    }
     private _encryptData(data: string): string {
         const key = crypto.scryptSync(Config.AES_PASSWORD, Config.AES_SALT, 32);
         const iv = crypto.randomBytes(16);
@@ -124,6 +130,7 @@ class UserModel {
         decrypted = decrypted + decipher.final("utf8");
         return decrypted;
     }
+    //#endregion
 }
 
 export default new UserModel();
