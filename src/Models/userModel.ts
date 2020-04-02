@@ -8,6 +8,7 @@ import JWT from 'jsonwebtoken';
 import config from '../config';
 import getUserByIdQuery from '../db/queries/users/get_user_by_id';
 import crypto from 'crypto';
+import Config from '../config';
 
 class UserModel {
 
@@ -107,19 +108,19 @@ class UserModel {
     }
 
     private _encryptData(data: string): string {
-        const key = crypto.scryptSync("heythere", 'salt', 32);
-        const iv = Buffer.alloc(16, 0);
+        const key = crypto.scryptSync(Config.AES_PASSWORD, Config.AES_SALT, 32);
+        const iv = crypto.randomBytes(16);
         const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
         let encrypted = cipher.update(data, "utf8", "hex");
         encrypted = encrypted + cipher.final("hex");
-        return encrypted;
+        return iv.toString('hex') + ':' + encrypted;
     }
 
     private _decryptData(data: string): string {
-        const key = crypto.scryptSync("heythere", 'salt', 32);
-        const iv = Buffer.alloc(16, 0);
+        const key = crypto.scryptSync(Config.AES_PASSWORD, Config.AES_SALT, 32);
+        const iv = new Buffer(data.split(':')[0], 'hex');
         const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-        let decrypted = decipher.update(data, "hex", "utf8");
+        let decrypted = decipher.update(data.split(':')[1], "hex", "utf8");
         decrypted = decrypted + decipher.final("utf8");
         return decrypted;
     }
