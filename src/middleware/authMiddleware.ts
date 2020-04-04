@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import userModel from "../Models/userModel";
+import Config from "../config";
 
 async function authMiddleware(req: Request, res: Response, next: NextFunction) {
     const token = req.headers['authorization'];
@@ -9,7 +10,7 @@ async function authMiddleware(req: Request, res: Response, next: NextFunction) {
     }
 
     try {
-        const user = await userModel.GetUserFromToken(token.replace("Bearer ", ""));
+        const user = await userModel.GetUserFromToken(token.replace("Bearer ", ""), Config.JWT_SECRET);
         //@ts-ignore
         req.user = user;
     } catch (e) {

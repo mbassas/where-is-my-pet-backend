@@ -2,13 +2,15 @@ import bcrypt from 'bcrypt';
 import { runQuery } from '../db/database';
 import insertUserQuery from '../db/queries/users/insert_user';
 import { UserInput, User } from '../Entities/user';
-import getUserByUsernameQuery from '../db/queries/users/get_user_by_username';
+import getUserByUsernameOrEmailQuery from '../db/queries/users/get_user_by_username_or_email';
 import CustomError, { ErrorType } from './customErrors';
 import JWT from 'jsonwebtoken';
 import config from '../config';
 import getUserByIdQuery from '../db/queries/users/get_user_by_id';
 import crypto from 'crypto';
 import Config from '../config';
+import resetPasswordQuery from '../db/queries/users/reset_password';
+import sendEmail from './emailModel';
 
 class UserModel {
     private _fieldsToEncrypt: Array<keyof UserInput> = ["email", "name", "surname", "username", "phone"]
@@ -33,7 +35,7 @@ class UserModel {
                 ]
             );
 
-            return this._getToken(queryResult.rows[0]);
+            return this._getToken(queryResult.rows[0], config.JWT_SECRET, "7d");
         } catch (e) {
             if (e.constraint === 'users_username_key') {
                 // If username is duplicated 
@@ -46,7 +48,7 @@ class UserModel {
 
     public async LogInUser(username: string, password: string): Promise<string> {
 
-        const queryResult = await runQuery<User>(getUserByUsernameQuery, [
+        const queryResult = await runQuery<User>(getUserByUsernameOrEmailQuery, [
             this._createHash(username),
         ]);
 
@@ -64,17 +66,56 @@ class UserModel {
             throw new CustomError(ErrorType.INVALID_USERNAME_OR_PASSWORD);
         }
 
-        return this._getToken(user);
+        return this._getToken(user, config.JWT_SECRET, "7d");
     }
 
-    private _getToken(user: User): string {
-        return JWT.sign(user.id.toString(), config.JWT_SECRET);
+    public async SendResetPassword(usernameOrEmail: string): Promise<void> {
+
+        const queryResult = await runQuery<User>(getUserByUsernameOrEmailQuery, [
+            this._createHash(usernameOrEmail),
+        ]);
+
+        if (queryResult.rowCount !== 1) {
+            console.error("User not found");
+            throw new CustomError(ErrorType.INVALID_USERNAME_OR_EMAIL);
+        }
+
+        const user = this._decryptUser(queryResult.rows[0]);
+
+        const resetPasswordToken = this._getToken(queryResult.rows[0], Config.JWT_RESET_PASSWORD_SECRET, "1h");
+        const resetPasswordLink = `https://mbassas.github.io/where-is-my-pet-frontend/reset-password?h=${resetPasswordToken}`;
+
+        await sendEmail({
+            destinationEmail: user.email,
+            subject: "Reset your password",
+            body: `<p>Hi ${user.name} ${user.surname},</p> <p>click the link below to restart your password:</p> <p><a href="${resetPasswordLink}">Reset Link</a></p>`
+        });
     }
-    public async GetUserFromToken(token: string): Promise<User> {
-        const userId = JWT.verify(token, config.JWT_SECRET);
+
+    public async ResetPassword(token: string, newPassword: string): Promise<void> {
+        const user = await this.GetUserFromToken(token, Config.JWT_RESET_PASSWORD_SECRET);
+        if (!user) {
+            console.error("User not found");
+            throw new CustomError(ErrorType.INVALID_TOKEN);
+        }
+        const encryptedPassword = await this._encryptPassword(newPassword);
+        await runQuery<User>(
+            resetPasswordQuery,
+            [
+                user.id,
+                encryptedPassword
+            ]
+        );
+    }
+
+    private _getToken(user: User, secret: string, expiration: string): string {
+        return JWT.sign({ id: user.id }, secret, { expiresIn: expiration });
+    }
+    public async GetUserFromToken(token: string, secret: string): Promise<User> {
+        const { id } = JWT.verify(token, secret) as { id: number };
 
         const queryResult = await runQuery<User>(getUserByIdQuery, [
-            userId
+            id
         ]);
 
         if (queryResult.rowCount !== 1) {
