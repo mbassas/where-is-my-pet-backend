@@ -6,6 +6,7 @@
     "dev": "nodemon",
     "prebuild": "rm -rf ./dist",
     "build": "tsc",
+    "postbuild": "cp -r src/db/queries/* dist/db/queries",
     "start": "node dist/index.js",
     "migrate": "db-migrate"
   },
