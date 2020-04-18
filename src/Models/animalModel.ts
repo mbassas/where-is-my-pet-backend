@@ -2,8 +2,9 @@ import { AnimalInput, Animal } from "../Entities/animal";
 import { runQuery } from "../db/database";
 import { User } from "../Entities/user";
 import fs from "fs";
+import path from "path";
 
-const insertAnimalQuery = fs.readFileSync("../db/queries/animals/insert_animal", "utf8");
+const insertAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal.sql"), "utf8");
 class AnimalModel {
 
     public async CreateAnimal(user: User, animal: AnimalInput): Promise<void> {
@@ -12,9 +13,9 @@ class AnimalModel {
                 insertAnimalQuery,
                 [
                     user.id,
-                    animal.state,
+                    animal.status,
                     animal.species,
-                    animal.breeds,
+                    animal.breed,
                     animal.size,
                     animal.color,
                     animal.name,
