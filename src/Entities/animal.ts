@@ -1,7 +1,7 @@
 export interface AnimalInput {
-    state: number;
+    status: number;
     species: number;
-    breeds: number;
+    breed: number;
     size: number;
     color: string;
     name: string;
