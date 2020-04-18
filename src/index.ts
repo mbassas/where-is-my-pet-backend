@@ -4,8 +4,15 @@ import userController from './Controllers/userController';
 import authMiddleware from './middleware/authMiddleware';
 import cors from 'cors';
 import Config from './config';
+import animalController from './Controllers/animalController';
+import { User } from './Entities/user';
 
 const app = express();
+
+export interface ApiRequest<T = any> extends express.Request {
+    body: T;
+    user?: User;
+}
 
 app.use(cors({ origin: Config.ALLOWED_ORIGINS }));
 app.use(authMiddleware);
@@ -20,3 +27,4 @@ app.listen(Config.PORT, () => {
 });
 
 app.use("/users", userController);
+app.use("/animals", animalController);

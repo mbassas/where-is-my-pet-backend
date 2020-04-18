@@ -4,15 +4,11 @@ import userModel from "../Models/userModel";
 import CustomError from "../Models/customErrors";
 import Joi from "@hapi/joi";
 import { createValidator } from "express-joi-validation";
+import { ApiRequest } from "..";
 
 const validator = createValidator();
 
 const userController = Router();
-
-interface ApiRequest<T> extends Request {
-    body: T;
-    user?: User;
-}
 
 const signUpBodySchema = Joi.object({
     name: Joi.string().required(),
