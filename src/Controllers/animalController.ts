@@ -26,8 +26,8 @@ const createAnimalBodySchema = Joi.object({
 });
 async function createAnimal(req: ApiRequest<AnimalInput>, res: Response) {
     try {
-        await animalModel.CreateAnimal(req.user, req.body);
-        res.sendStatus(204);
+        const animalId = await animalModel.CreateAnimal(req.user, req.body);
+        res.status(200).send(animalId);
     } catch (e) {
         if (e instanceof CustomError) {
             res.status(e.getHttpStatusCode()).send(e.getMessage());
@@ -35,8 +35,22 @@ async function createAnimal(req: ApiRequest<AnimalInput>, res: Response) {
             res.sendStatus(500);
         }
     }
-}
+};
+
+async function getAnimalById({ params }: ApiRequest, res: Response) {
+    try {
+        const animal = await animalModel.GetAnimalById(parseInt(params.id));
+        res.send(animal);
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+};
 
 animalController.post("/", forceLoginMiddleware, validator.body(createAnimalBodySchema), createAnimal);
+animalController.get("/:id", getAnimalById);
 
 export default animalController;

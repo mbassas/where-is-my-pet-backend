@@ -11,4 +11,4 @@ SELECT insert_animal(
     $10,
     $11,
     $12
-);
+) as id;
