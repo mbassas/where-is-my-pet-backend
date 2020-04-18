@@ -182,7 +182,7 @@ CREATE TABLE animals
 (
     id serial PRIMARY KEY,
     user_id int NOT NULL,
-    state int NOT NULL REFERENCES animal_status(id),
+    status int NOT NULL REFERENCES animal_status(id),
     species int NOT NULL REFERENCES animal_species(id),
     breed int REFERENCES animal_breed(id),
     size int REFERENCES animal_size(id),
@@ -191,7 +191,69 @@ CREATE TABLE animals
     gender int REFERENCES animal_gender(id),
     age VARCHAR(255),
     publication_date TIMESTAMP WITHOUT TIME ZONE DEFAULT timezone('utc', now()) NOT NULL,
-    lat int NOT NULL,
-    lng int NOT NULL,
+    lat FLOAT NOT NULL,
+    lng FLOAT NOT NULL,
     images VARCHAR(255) NOT NULL
 );
+
+CREATE OR REPLACE FUNCTION insert_animal (
+    user_id INTEGER,
+    status VARCHAR,
+    species VARCHAR,
+    breed VARCHAR,
+    size VARCHAR,
+    color VARCHAR,
+    name VARCHAR,
+    gender VARCHAR,
+    age INTEGER,
+    lat FLOAT,
+    lng FLOAT,
+    images VARCHAR
+) RETURNS INTEGER AS $$
+DECLARE
+    species_id INTEGER;
+    state_id INTEGER;
+    breed_id INTEGER;
+    size_id INTEGER;
+    gender_id INTEGER;
+    animal_id INTEGER;
+BEGIN
+    state_id := (SELECT id FROM animal_status WHERE value = status);
+    species_id := (SELECT id FROM animal_species WHERE value = species);
+    breed_id := (SELECT id FROM animal_breed WHERE value = breed AND species = species_id);
+    size_id := (SELECT id FROM animal_size WHERE value = size);
+    gender_id := (SELECT id FROM animal_size WHERE value = gender);
+    
+    INSERT INTO animals (
+        user_id,
+        status,
+        species,
+        breed,
+        size,
+        color,
+        name,
+        gender,
+        age,
+        lat,
+        lng,
+        images
+    ) 
+    VALUES (
+        user_id,
+        state_id, 
+        species_id,
+        breed_id, 
+        size_id,
+        color,
+        name,
+        gender_id,
+        age,
+        lat,
+        lng,
+        images
+    )
+    RETURNING id into animal_id;
+
+    RETURN animal_id;
+END;
+$$ LANGUAGE PLPGSQL;
