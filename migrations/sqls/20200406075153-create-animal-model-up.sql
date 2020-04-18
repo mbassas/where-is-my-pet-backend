@@ -220,7 +220,7 @@ DECLARE
 BEGIN
     state_id := (SELECT id FROM animal_status WHERE value = status);
     species_id := (SELECT id FROM animal_species WHERE value = species);
-    breed_id := (SELECT id FROM animal_breed WHERE value = breed AND species = species_id);
+    breed_id := (SELECT id FROM animal_breed WHERE value = breed AND animal_breed.species = species_id);
     size_id := (SELECT id FROM animal_size WHERE value = size);
     gender_id := (SELECT id FROM animal_size WHERE value = gender);
     
