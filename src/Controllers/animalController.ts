@@ -12,16 +12,16 @@ const validator = createValidator();
 const animalController = Router();
 
 const createAnimalBodySchema = Joi.object({
-    state: Joi.string().required(),
+    status: Joi.string().required(),
     species: Joi.string().required(),
-    breeds: Joi.string(),
+    breed: Joi.string(),
     size: Joi.string(),
     color: Joi.string(),
     name: Joi.string(),
     gender: Joi.string(),
-    age: Joi.string(),
-    lat: Joi.string().required(),
-    lng: Joi.string().required(),
+    age: Joi.number(),
+    lat: Joi.number().required(),
+    lng: Joi.number().required(),
     images: Joi.string().required(),
 });
 async function createAnimal(req: ApiRequest<AnimalInput>, res: Response) {
