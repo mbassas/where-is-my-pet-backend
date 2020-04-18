@@ -191,8 +191,8 @@ CREATE TABLE animals
     gender int REFERENCES animal_gender(id),
     age VARCHAR(255),
     publication_date TIMESTAMP WITHOUT TIME ZONE DEFAULT timezone('utc', now()) NOT NULL,
-    lat int NOT NULL,
-    lng int NOT NULL,
+    lat FLOAT NOT NULL,
+    lng FLOAT NOT NULL,
     images VARCHAR(255) NOT NULL
 );
 
