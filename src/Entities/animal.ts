@@ -1,11 +1,11 @@
 export interface AnimalInput {
-    status: number;
-    species: number;
-    breed: number;
-    size: number;
+    status: string;
+    species: string;
+    breed: string;
+    size: string;
     color: string;
     name: string;
-    gender: number;
+    gender: string;
     age: string;
     lat: number;
     lng: number;
