@@ -1,6 +1,5 @@
 import { Router, Request, Response } from "express";
 import CustomError from "../Models/customErrors";
-import animalModel from "../Models/animalModel";
 import speciesModel from "../Models/speciesModel";
 
 const speciesController = Router();
