@@ -6,6 +6,7 @@ import cors from 'cors';
 import Config from './config';
 import animalController from './Controllers/animalController';
 import { User } from './Entities/user';
+import speciesController from './Controllers/speciesController';
 
 const app = express();
 
@@ -28,3 +29,4 @@ app.listen(Config.PORT, () => {
 
 app.use("/users", userController);
 app.use("/animals", animalController);
+app.use("/species", speciesController);
