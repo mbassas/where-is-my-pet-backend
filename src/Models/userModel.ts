@@ -41,6 +41,10 @@ class UserModel {
                 // If username is duplicated 
                 throw new CustomError(ErrorType.USERNAME_ALREADY_EXISTS);
             }
+            if (e.constraint === 'users_email_hash_key') {
+                // If email is duplicated 
+                throw new CustomError(ErrorType.EMAIL_ALREADY_EXISTS);
+            }
             console.error(e);
             throw e;
         }

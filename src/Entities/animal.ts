@@ -9,7 +9,6 @@ export interface AnimalInput {
     age: string;
     lat: number;
     lng: number;
-    images: string;
 }
 
 export interface Animal extends AnimalInput {

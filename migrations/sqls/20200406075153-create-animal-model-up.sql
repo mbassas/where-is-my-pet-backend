@@ -192,8 +192,7 @@ CREATE TABLE animals
     age VARCHAR(255),
     publication_date TIMESTAMP WITHOUT TIME ZONE DEFAULT timezone('utc', now()) NOT NULL,
     lat FLOAT NOT NULL,
-    lng FLOAT NOT NULL,
-    images VARCHAR(255) NOT NULL
+    lng FLOAT NOT NULL
 );
 
 CREATE OR REPLACE FUNCTION insert_animal (
@@ -207,8 +206,7 @@ CREATE OR REPLACE FUNCTION insert_animal (
     gender VARCHAR,
     age INTEGER,
     lat FLOAT,
-    lng FLOAT,
-    images VARCHAR
+    lng FLOAT
 ) RETURNS INTEGER AS $$
 DECLARE
     species_id INTEGER;
@@ -235,8 +233,7 @@ BEGIN
         gender,
         age,
         lat,
-        lng,
-        images
+        lng
     ) 
     VALUES (
         user_id,
@@ -249,8 +246,7 @@ BEGIN
         gender_id,
         age,
         lat,
-        lng,
-        images
+        lng
     )
     RETURNING id into animal_id;
 
