@@ -6,6 +6,7 @@
     "dev": "nodemon",
     "prebuild": "rm -rf ./dist",
     "build": "tsc",
+    "postbuild": "cp -r src/db/queries/* dist/db/queries",
     "start": "node dist/index.js",
     "migrate": "db-migrate"
   },
@@ -22,8 +23,12 @@
     "express": "^4.17.1",
     "express-joi-validation": "^4.0.3",
     "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.2",
     "nodemailer": "^6.4.6",
-    "pg": "^7.18.2"
+    "pg": "^7.18.2",
+    "pg-large-object": "^2.0.0",
+    "sharp": "^0.25.2",
+    "uuid": "^7.0.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
@@ -31,8 +36,12 @@
     "@types/express": "^4.17.3",
     "@types/hapi__joi": "^16.0.12",
     "@types/jsonwebtoken": "^8.3.8",
+    "@types/multer": "^1.4.3",
     "@types/nodemailer": "^6.4.0",
     "@types/pg": "^7.14.3",
+    "@types/pg-large-object": "^2.0.2",
+    "@types/sharp": "^0.25.0",
+    "@types/uuid": "^7.0.3",
     "nodemon": "^2.0.2",
     "ts-node": "^8.7.0",
     "typescript": "^3.8.3"

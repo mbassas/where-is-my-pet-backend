@@ -37,9 +37,13 @@ class UserModel {
 
             return this._getToken(queryResult.rows[0], config.JWT_SECRET, "7d");
         } catch (e) {
-            if (e.constraint === 'users_username_key') {
+            if (e.constraint === 'users_username_hash_key') {
                 // If username is duplicated 
                 throw new CustomError(ErrorType.USERNAME_ALREADY_EXISTS);
+            }
+            if (e.constraint === 'users_email_hash_key') {
+                // If email is duplicated 
+                throw new CustomError(ErrorType.EMAIL_ALREADY_EXISTS);
             }
             console.error(e);
             throw e;
