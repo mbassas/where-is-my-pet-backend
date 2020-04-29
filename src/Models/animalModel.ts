@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import {v4 as uuid} from "uuid";
+import osm from "osm-static-maps"
 
 const insertAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal.sql"), "utf8");
 const insertAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal_image.sql"), "utf8");
@@ -39,6 +40,7 @@ class AnimalModel {
                     animal.age,
                     animal.lat,
                     animal.lng,
+                    animal.location
                 ]
             );
             const animalId = queryResult.rows[0].id;
@@ -96,6 +98,20 @@ class AnimalModel {
         return {
             path: destinationPath,
             mimetype: "image/png"
+        }
+    }
+
+    public async generateMapImage (lat: number, lng: number): Promise<Buffer>{
+        try {
+
+            const geojson = {
+                "type":"Point",
+                "coordinates": [lng, lat]
+            };
+
+            return await osm({geojson: JSON.stringify(geojson), height: 300, width: 600});
+        } catch (e) {
+            console.error(e);
         }
     }
 }

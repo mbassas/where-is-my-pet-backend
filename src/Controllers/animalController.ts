@@ -24,7 +24,7 @@ const createAnimalBodySchema = Joi.object({
     age: Joi.number(),
     lat: Joi.number().required(),
     lng: Joi.number().required(),
-    //images: Joi.string().required(),
+    location: Joi.string().required()
 });
 async function createAnimal(req: ApiRequest<AnimalInput>, res: Response) {
     try {
@@ -78,5 +78,11 @@ async function getAnimalById({ params }: ApiRequest, res: Response) {
 animalController.post("/", forceLoginMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
 animalController.get("/:id", getAnimalById);
 animalController.get("/:id/:imageName.png", getAnimalImage);
+animalController.get("/map/:lat/:lng", async (req: ApiRequest, res: Response) => {
+    const {lat, lng} = req.params;
+
+    const image = await animalModel.generateMapImage(parseFloat(lat), parseFloat(lng));
+    res.contentType("image/png").send(image);
+})
 
 export default animalController;

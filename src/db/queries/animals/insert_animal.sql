@@ -9,5 +9,6 @@ SELECT insert_animal(
     $8,
     $9,
     $10,
-    $11
+    $11,
+    $12
 ) as id;
