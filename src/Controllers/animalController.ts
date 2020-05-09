@@ -62,6 +62,25 @@ async function getAnimalImage({params}: ApiRequest, res: Response) {
     }
 }
 
+async function getAnimalLocationImage({params}: ApiRequest, res: Response) {
+    try {
+        const image = await animalModel.GetLocationImage(
+            parseInt(params.id)
+        );
+        
+        res
+            .contentType("image/png")
+            .send(image);
+
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+}
+
 async function getAnimalById({ params }: ApiRequest, res: Response) {
     try {
         const animal = await animalModel.GetAnimalById(parseInt(params.id));
@@ -77,12 +96,8 @@ async function getAnimalById({ params }: ApiRequest, res: Response) {
 
 animalController.post("/", forceLoginMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
 animalController.get("/:id", getAnimalById);
+animalController.get("/:id/location.png", getAnimalLocationImage);
 animalController.get("/:id/:imageName.png", getAnimalImage);
-animalController.get("/map/:lat/:lng", async (req: ApiRequest, res: Response) => {
-    const {lat, lng} = req.params;
 
-    const image = await animalModel.generateMapImage(parseFloat(lat), parseFloat(lng));
-    res.contentType("image/png").send(image);
-})
 
 export default animalController;

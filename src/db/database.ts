@@ -38,7 +38,16 @@ export async function insertLargeObject(file: string | Buffer):Promise<number> {
                     resolve(oid);
                 });
 
-                fs.createReadStream(file).pipe(stream);
+                if (typeof file === "string") {
+                    fs.createReadStream(file).pipe(stream);
+                } else {
+                    stream.write(file, (err) => {
+                        if (err) { throw err; }
+
+                        stream.end();
+                    })
+
+                }
             });
         });
 

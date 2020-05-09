@@ -13,6 +13,7 @@ export interface AnimalInput {
 }
 
 export interface Animal extends AnimalInput {
+    location_id: any;
     id: number;
     user_id: number;
     publication_date: string;

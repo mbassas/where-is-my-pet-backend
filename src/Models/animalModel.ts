@@ -6,15 +6,17 @@ import path from "path";
 import sharp from "sharp";
 import {v4 as uuid} from "uuid";
 import osm from "osm-static-maps"
+import CustomError, { ErrorType } from "./customErrors";
 
 const insertAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal.sql"), "utf8");
 const insertAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal_image.sql"), "utf8");
 const getAnimalByIdQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/get_animal_by_id.sql"), "utf8");
 const getAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/get_animal_image.sql"), "utf8");
 const deleteAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/delete_animal_by_id.sql"), "utf8");
+const getAnimalLocationQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/get_animal_location.sql"), "utf8");
 class AnimalModel {
 
-    public async GetAnimalById(id: number): Promise<Object> {
+    public async GetAnimalById(id: number): Promise<Animal> {
         const queryResult = await runQuery<Animal>(getAnimalByIdQuery, [
             id
         ]);
@@ -46,6 +48,7 @@ class AnimalModel {
             const animalId = queryResult.rows[0].id;
             
             try {
+                // Insert animal photos
                 for (let i = 0; i < animalImages.length; i++) {
                     const image = animalImages[i];
                     const {path, mimetype} = await this.resizeImage(image);
@@ -58,6 +61,12 @@ class AnimalModel {
                         uuid().split("-").join("")
                     ]);
                 }
+
+                // Generate location thumbnail
+                const map = await this.generateMapImage(animal.lat, animal.lng);
+                const mapOid = await insertLargeObject(map);
+                await runQuery<void>("UPDATE animal_location SET map_image = $1 WHERE id = (SELECT location_id FROM animals WHERE id = $2)", [mapOid, animalId]);
+
                 
             } catch(e) {
                 // If image insert fails, rollback all data previously inserted
@@ -91,6 +100,23 @@ class AnimalModel {
         }
     }
 
+    public async GetLocationImage(animalId: number) {
+        try {
+            const result = await runQuery<any>(getAnimalLocationQuery, [animalId]);
+            
+            if (result.rowCount === 0) {
+                throw new CustomError(ErrorType.NOT_FOUND);
+            }
+
+            const oid = result.rows[0].map_image;
+
+            const image = await readLargeObject(oid);
+            return image;            
+        } catch (e) {
+            throw e;
+        }
+    }
+
     private async resizeImage(image: Express.Multer.File): Promise<{path: string, mimetype: string}> {
         const destinationPath = `${image.path}-resized`;
         await sharp(image.path).resize(1000).png().toFile(destinationPath);
@@ -109,7 +135,7 @@ class AnimalModel {
                 "coordinates": [lng, lat]
             };
 
-            return await osm({geojson: JSON.stringify(geojson), height: 300, width: 600});
+            return await osm({geojson: JSON.stringify(geojson), height: 300, width: 600, zoom: 15});
         } catch (e) {
             console.error(e);
         }

@@ -10,6 +10,7 @@ select
     ag.value as gender,
     a.age,
     a.publication_date,
+    al.id as location_id,
     al.location,
     al.lng,
     al.lat,
