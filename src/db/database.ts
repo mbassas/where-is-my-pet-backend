@@ -2,7 +2,6 @@ import pg from 'pg';
 import Config from "../config";
 import { LargeObjectManager } from 'pg-large-object';
 import fs from "fs";
-import e from 'express';
 
 const pool = new pg.Pool({
     connectionString: Config.DATABASE_URL,
@@ -19,9 +18,8 @@ export async function runQuery<T = any>(query: string, params: any[] = []) {
 }
 
 export async function insertLargeObject(file: string):Promise<number> {
-    try{
-        const client = await pool.connect();
-
+    const client = await pool.connect();
+    try {
         const largeObjectManager = new LargeObjectManager({pg: client});
 
         // When working with Large Objects, always use a transaction
@@ -48,13 +46,14 @@ export async function insertLargeObject(file: string):Promise<number> {
     } catch(e) {
         console.error(e);
         throw e;
+    } finally {
+        client.release();
     }
 }
 
 export async function readLargeObject(oid: number): Promise<Buffer> {
+    const client = await pool.connect();
     try {
-        const client = await pool.connect();
-        
         const largeObjectManager = new LargeObjectManager({ pg: client });
 
         // When working with Large Objects, always use a transaction
@@ -63,7 +62,7 @@ export async function readLargeObject(oid: number): Promise<Buffer> {
         const image = await largeObjectManager.openAsync(oid, LargeObjectManager.READ);
         const size = await image.sizeAsync();
         
-        const buffer = image.readAsync(size);
+        const buffer = await image.readAsync(size);
 
         // Close the transaction
         await client.query("COMMIT");
@@ -72,5 +71,7 @@ export async function readLargeObject(oid: number): Promise<Buffer> {
     } catch (e) {
         console.error(e);
         throw e;
+    } finally {
+        client.release();
     }
 }
