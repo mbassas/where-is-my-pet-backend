@@ -10,8 +10,10 @@ select
     ag.value as gender,
     a.age,
     a.publication_date,
-    a.lat,
-    a.lng,
+    al.id as location_id,
+    al.location,
+    al.lng,
+    al.lat,
     ai.image_name
     
 from animals a
@@ -21,6 +23,7 @@ from animals a
     left join animal_size asize on a.size = asize.id
     left join animal_gender ag on a.gender = ag.id
     left join animal_images ai on ai.animal_id = a.id
+    left join animal_location al on a.location_id = al.id
 
 where
 	a.id=$1

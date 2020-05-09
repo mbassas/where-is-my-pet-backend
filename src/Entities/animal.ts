@@ -9,9 +9,11 @@ export interface AnimalInput {
     age: string;
     lat: number;
     lng: number;
+    location: string;
 }
 
 export interface Animal extends AnimalInput {
+    location_id: any;
     id: number;
     user_id: number;
     publication_date: string;
