@@ -17,7 +17,7 @@ export async function runQuery<T = any>(query: string, params: any[] = []) {
     }
 }
 
-export async function insertLargeObject(file: string):Promise<number> {
+export async function insertLargeObject(file: string | Buffer):Promise<number> {
     const client = await pool.connect();
     try {
         const largeObjectManager = new LargeObjectManager({pg: client});
@@ -38,7 +38,16 @@ export async function insertLargeObject(file: string):Promise<number> {
                     resolve(oid);
                 });
 
-                fs.createReadStream(file).pipe(stream);
+                if (typeof file === "string") {
+                    fs.createReadStream(file).pipe(stream);
+                } else {
+                    stream.write(file, (err) => {
+                        if (err) { throw err; }
+
+                        stream.end();
+                    })
+
+                }
             });
         });
 

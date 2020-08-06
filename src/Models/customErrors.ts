@@ -4,7 +4,8 @@ export enum ErrorType {
     EMAIL_ALREADY_EXISTS,
     INVALID_USERNAME_OR_EMAIL,
     INVALID_TOKEN,
-    ANIMAL_IMAGES_REQUIRED
+    ANIMAL_IMAGES_REQUIRED,
+    NOT_FOUND
 }
 
 const errorDetails = {
@@ -31,6 +32,10 @@ const errorDetails = {
     [ErrorType.ANIMAL_IMAGES_REQUIRED]: {
         status: 400,
         message: "Images is required",
+    },
+    [ErrorType.NOT_FOUND]: {
+        status: 404,
+        message: ""
     },
 }
 

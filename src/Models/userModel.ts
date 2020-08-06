@@ -87,7 +87,7 @@ class UserModel {
         const user = this._decryptUser(queryResult.rows[0]);
 
         const resetPasswordToken = this._getToken(queryResult.rows[0], Config.JWT_RESET_PASSWORD_SECRET, "1h");
-        const resetPasswordLink = `https://mbassas.github.io/where-is-my-pet-frontend/reset-password?h=${resetPasswordToken}`;
+        const resetPasswordLink = `https://mbassas.github.io/where-is-my-pet-frontend/#/recover-password?h=${resetPasswordToken}`;
 
         await sendEmail({
             destinationEmail: user.email,

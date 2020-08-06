@@ -24,7 +24,7 @@ const createAnimalBodySchema = Joi.object({
     age: Joi.number(),
     lat: Joi.number().required(),
     lng: Joi.number().required(),
-    //images: Joi.string().required(),
+    location: Joi.string().required()
 });
 async function createAnimal(req: ApiRequest<AnimalInput>, res: Response) {
     try {
@@ -32,8 +32,9 @@ async function createAnimal(req: ApiRequest<AnimalInput>, res: Response) {
             throw new CustomError(ErrorType.ANIMAL_IMAGES_REQUIRED);
         }
         const animalId = await animalModel.CreateAnimal(req.user, req.body, req.files as any);
-        res.sendStatus(204);
+        res.status(201).send({id: animalId});
     } catch (e) {
+        console.error(e);
         if (e instanceof CustomError) {
             res.status(e.getHttpStatusCode()).send(e.getMessage());
         } else {
@@ -62,6 +63,25 @@ async function getAnimalImage({params}: ApiRequest, res: Response) {
     }
 }
 
+async function getAnimalLocationImage({params}: ApiRequest, res: Response) {
+    try {
+        const image = await animalModel.GetLocationImage(
+            parseInt(params.id)
+        );
+        
+        res
+            .contentType("image/png")
+            .send(image);
+
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+}
+
 async function getAnimalById({ params }: ApiRequest, res: Response) {
     try {
         const animal = await animalModel.GetAnimalById(parseInt(params.id));
@@ -75,8 +95,29 @@ async function getAnimalById({ params }: ApiRequest, res: Response) {
     }
 };
 
+async function getAnimals({ query }: ApiRequest, res: Response) {
+    const start = parseInt(query.start);
+    const count = parseInt(query.count);
+    try {
+        const animals = await animalModel.GetAnimals({
+            start: start || undefined, 
+            count: count || undefined
+        });
+        res.send(animals);
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+};
+
 animalController.post("/", forceLoginMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
 animalController.get("/:id", getAnimalById);
+animalController.get("/:id/location.png", getAnimalLocationImage);
 animalController.get("/:id/:imageName.png", getAnimalImage);
+animalController.get("/", getAnimals);
+
 
 export default animalController;
