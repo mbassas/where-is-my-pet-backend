@@ -87,6 +87,20 @@ async function resetPassword({ body }: ApiRequest<{ token: string, newPassword: 
     }
 }
 
+function getUserInfo(req: ApiRequest, res: Response) {
+    if(req.user) {
+        res.send({
+            username: req.user.username,
+            name: req.user.name,
+            surname: req.user.surname
+        });
+        return;
+    }
+
+    res.sendStatus(204);
+}
+
+userController.get("/", getUserInfo);
 userController.post("/sign-up", validator.body(signUpBodySchema), signUp);
 userController.post("/sign-in", validator.body(signInBodySchema), signIn);
 userController.post("/reset-password-email", validator.body(sendResetPasswordEmailBodySchema), sendResetPasswordEmail);

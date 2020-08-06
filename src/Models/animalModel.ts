@@ -7,6 +7,7 @@ import sharp from "sharp";
 import {v4 as uuid} from "uuid";
 import osm from "osm-static-maps"
 import CustomError, { ErrorType } from "./customErrors";
+import getAnimalsQuery, { IGetAnimalQueryParams } from "../db/queries/animals/get_animals";
 
 const insertAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal.sql"), "utf8");
 const insertAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal_image.sql"), "utf8");
@@ -25,6 +26,12 @@ class AnimalModel {
         }
         return queryResult.rows[0];
     };
+
+    public async GetAnimals(params: IGetAnimalQueryParams): Promise<Animal[]> {
+        const queryResult = await runQuery<Animal>(getAnimalsQuery(params));
+
+        return queryResult.rows;
+    }
 
     public async CreateAnimal(user: User, animal: AnimalInput, animalImages: Express.Multer.File[]): Promise<number> {
         try {
@@ -65,9 +72,7 @@ class AnimalModel {
                 // Generate location thumbnail
                 const map = await this.generateMapImage(animal.lat, animal.lng);
                 const mapOid = await insertLargeObject(map);
-                await runQuery<void>("UPDATE animal_location SET map_image = $1 WHERE id = (SELECT location_id FROM animals WHERE id = $2)", [mapOid, animalId]);
-
-                
+                await runQuery<void>("UPDATE animal_location SET map_image = $1 WHERE id = (SELECT location_id FROM animals WHERE id = $2)", [mapOid, animalId]);                
             } catch(e) {
                 // If image insert fails, rollback all data previously inserted
                 await runQuery(deleteAnimalQuery, [animalId]);
