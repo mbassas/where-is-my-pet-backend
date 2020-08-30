@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import {v4 as uuid} from "uuid";
-import osm from "osm-static-maps"
+const osm = require("osm-static-maps");
 import CustomError, { ErrorType } from "./customErrors";
 import getAnimalsQuery, { IGetAnimalQueryParams } from "../db/queries/animals/get_animals";
 
