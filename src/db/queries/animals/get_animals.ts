@@ -1,11 +1,19 @@
 export interface IGetAnimalQueryParams {
     start?: number;
     count?: number;
+    species?: number;
+    breed?: number;
+    lat?: number;
+    lng?: number;
 }
 
 function getAnimalsQuery({
     start = 0,
     count = 10,
+    species = undefined,
+    breed = undefined,
+    lat = undefined,
+    lng = undefined,
 }: IGetAnimalQueryParams) {
     let query = `
     select
@@ -25,7 +33,6 @@ function getAnimalsQuery({
         al.lng,
         al.lat,
         ai.image_name
-        
     from animals a
         left join animal_species aspec on a.species = aspec.id
         left join animal_breed ab on a.breed = ab.id
@@ -35,6 +42,24 @@ function getAnimalsQuery({
         left join animal_images ai on ai.animal_id = a.id
         left join animal_location al on a.location_id = al.id
     `;
+
+    if (species || breed) {
+        query += `
+            WHERE
+        `;
+    }
+
+    if (species) {
+        query += `
+            aspec.value = '${species}'
+        `
+    }
+
+    if (breed) {
+        query += `
+            AND ab.value = '${breed}'
+        `
+    }
 
 
     query += `LIMIT ${count} OFFSET ${start}`;
