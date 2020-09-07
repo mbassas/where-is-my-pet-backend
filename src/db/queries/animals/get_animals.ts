@@ -5,6 +5,7 @@ export interface IGetAnimalQueryParams {
     breed?: number;
     lat?: number;
     lng?: number;
+    status?: string;
 }
 
 function getAnimalsQuery({
@@ -14,6 +15,7 @@ function getAnimalsQuery({
     breed = undefined,
     lat = undefined,
     lng = undefined,
+    status = undefined,
 }: IGetAnimalQueryParams) {
     let query = `
     select
@@ -61,6 +63,11 @@ function getAnimalsQuery({
         `
     }
 
+    if (status) {
+        query += `
+            WHERE astat.value = '${status}'
+        `
+    }
 
     query += `LIMIT ${count} OFFSET ${start}`;
     return query;

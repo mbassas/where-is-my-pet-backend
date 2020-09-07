@@ -100,6 +100,7 @@ async function getAnimals({ query }: ApiRequest, res: Response) {
     const count = parseInt(query.count);
     const species = query.species;
     const breed = query.breed;
+    const status = query.status;
     const lat = parseInt(query.lat);
     const lng = parseInt(query.lng);
 
@@ -110,13 +111,15 @@ async function getAnimals({ query }: ApiRequest, res: Response) {
             species: species || undefined,
             breed: breed || undefined,
             lat: lat || undefined,
-            lng: lng || undefined
+            lng: lng || undefined,
+            status: status || undefined
         });
         res.send(animals);
     } catch (e) {
         if (e instanceof CustomError) {
             res.status(e.getHttpStatusCode()).send(e.getMessage());
         } else {
+            console.error(e);
             res.sendStatus(500);
         }
     }
