@@ -8,6 +8,7 @@ import animalController from './Controllers/animalController';
 import { User } from './Entities/user';
 import speciesController from './Controllers/speciesController';
 import breedController from './Controllers/breedController';
+import imageRecognitionController from './Controllers/imageRecognitionController';
 
 const app = express();
 
@@ -32,3 +33,4 @@ app.use("/users", userController);
 app.use("/animals", animalController);
 app.use("/species", speciesController);
 app.use("/breeds", breedController);
+app.use("/image-recognition", imageRecognitionController);

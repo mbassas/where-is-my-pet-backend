@@ -98,16 +98,28 @@ async function getAnimalById({ params }: ApiRequest, res: Response) {
 async function getAnimals({ query }: ApiRequest, res: Response) {
     const start = parseInt(query.start);
     const count = parseInt(query.count);
+    const species = query.species;
+    const breed = query.breed;
+    const status = query.status;
+    const lat = parseFloat(query.lat);
+    const lng = parseFloat(query.lng);
+
     try {
         const animals = await animalModel.GetAnimals({
             start: start || undefined, 
-            count: count || undefined
+            count: count || undefined,
+            species: species || undefined,
+            breed: breed || undefined,
+            lat: lat || undefined,
+            lng: lng || undefined,
+            status: status || undefined
         });
         res.send(animals);
     } catch (e) {
         if (e instanceof CustomError) {
             res.status(e.getHttpStatusCode()).send(e.getMessage());
         } else {
+            console.error(e);
             res.sendStatus(500);
         }
     }

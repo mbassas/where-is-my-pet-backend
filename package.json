@@ -13,7 +13,9 @@
   "author": "Montserrat Bassas <montsebassas.mb@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/vision": "^2.1.1",
     "@hapi/joi": "^17.1.1",
+    "@types/string-similarity": "^3.0.0",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -23,12 +25,14 @@
     "express": "^4.17.1",
     "express-joi-validation": "^4.0.3",
     "jsonwebtoken": "^8.5.1",
+    "memoizee": "^0.4.14",
     "multer": "^1.4.2",
     "nodemailer": "^6.4.6",
     "osm-static-maps": "^3.8.1",
     "pg": "^7.18.2",
     "pg-large-object": "^2.0.0",
     "sharp": "^0.25.2",
+    "string-similarity": "^4.0.2",
     "uuid": "^7.0.3"
   },
   "devDependencies": {
@@ -37,6 +41,7 @@
     "@types/express": "^4.17.3",
     "@types/hapi__joi": "^16.0.12",
     "@types/jsonwebtoken": "^8.3.8",
+    "@types/memoizee": "^0.4.4",
     "@types/multer": "^1.4.3",
     "@types/nodemailer": "^6.4.0",
     "@types/pg": "^7.14.3",
