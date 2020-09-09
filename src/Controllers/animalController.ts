@@ -101,8 +101,8 @@ async function getAnimals({ query }: ApiRequest, res: Response) {
     const species = query.species;
     const breed = query.breed;
     const status = query.status;
-    const lat = parseInt(query.lat);
-    const lng = parseInt(query.lng);
+    const lat = parseFloat(query.lat);
+    const lng = parseFloat(query.lng);
 
     try {
         const animals = await animalModel.GetAnimals({

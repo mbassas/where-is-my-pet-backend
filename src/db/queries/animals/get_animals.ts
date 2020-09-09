@@ -18,58 +18,60 @@ function getAnimalsQuery({
     status = undefined,
 }: IGetAnimalQueryParams) {
     let query = `
-    select
-        a.id,
-        a.user_id,
-        astat.value as status,
-        aspec.value as species,
-        ab.value as breed,
-        asize.value as size,
-        a.color,
-        a.name,
-        ag.value as gender,
-        a.age,
-        a.publication_date,
-        al.id as location_id,
-        al.location,
-        al.lng,
-        al.lat,
-        ai.image_name
-    from animals a
-        left join animal_species aspec on a.species = aspec.id
-        left join animal_breed ab on a.breed = ab.id
-        left join animal_status astat on a.status = astat.id
-        left join animal_size asize on a.size = asize.id
-        left join animal_gender ag on a.gender = ag.id
-        left join animal_images ai on ai.animal_id = a.id
-        left join animal_location al on a.location_id = al.id
-    `;
+select
+    a.id,
+    a.user_id,
+    astat.value as status,
+    aspec.value as species,
+    ab.value as breed,
+    asize.value as size,
+    a.color,
+    a.name,
+    ag.value as gender,
+    a.age,
+    a.publication_date,
+    al.id as location_id,
+    al.location,
+    al.lng,
+    al.lat,
+    ai.image_name
+    ${(lat && lng) ? `, calculate_distance(al.lat, al.lng, ${lat}, ${lng}) as distance` : ""}
+from animals a
+    left join animal_species aspec on a.species = aspec.id
+    left join animal_breed ab on a.breed = ab.id
+    left join animal_status astat on a.status = astat.id
+    left join animal_size asize on a.size = asize.id
+    left join animal_gender ag on a.gender = ag.id
+    left join animal_images ai on ai.animal_id = a.id
+    left join animal_location al on a.location_id = al.id`;
 
-    if (species || breed) {
-        query += `
-            WHERE
-        `;
+    const hasWhere = species || breed || status;
+    if (hasWhere) {
+        query += `\nwhere`;
     }
 
     if (species) {
-        query += `
-            aspec.value = '${species}'
-        `
+        query += `\n  aspec.value = '${species}' AND`;
     }
 
     if (breed) {
-        query += `
-            AND ab.value = '${breed}'
-        `
+        query += `\n  ab.value = '${breed}' AND`;
     }
 
     if (status) {
-        query += `
-            WHERE astat.value = '${status}'
-        `
+        query += `\n  astat.value = '${status}' AND`;
     }
 
-    query += `LIMIT ${count} OFFSET ${start}`;
+    if (hasWhere) {
+        query = query.replace(/AND$/, "");
+    }
+
+    if (lat && lng) {
+        query += `\nORDER BY distance ASC`
+    }
+
+    query += `\nLIMIT ${count} OFFSET ${start}`;
+
     return query;
 };
 

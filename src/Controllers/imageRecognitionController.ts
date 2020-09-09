@@ -26,6 +26,6 @@ async function getAnimalInfo (req: ApiRequest, res: Response) {
     }
 };
 
-imageRecognitionController.post("/", forceLoginMiddleware , upload.single("image"), getAnimalInfo);
+imageRecognitionController.post("/", upload.single("image"), getAnimalInfo);
 
 export default imageRecognitionController;
