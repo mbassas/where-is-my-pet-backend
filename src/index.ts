@@ -9,6 +9,7 @@ import { User } from './Entities/user';
 import speciesController from './Controllers/speciesController';
 import breedController from './Controllers/breedController';
 import imageRecognitionController from './Controllers/imageRecognitionController';
+import compression from 'compression';
 
 const app = express();
 
@@ -16,6 +17,9 @@ export interface ApiRequest<T = any> extends express.Request {
     body: T;
     user?: User;
 }
+
+//add gzip compression
+app.use(compression());
 
 app.use(cors({ origin: Config.ALLOWED_ORIGINS }));
 app.use(authMiddleware);
