@@ -70,9 +70,9 @@ class AnimalModel {
                 }
 
                 // Generate location thumbnail
-                const map = await this.generateMapImage(animal.lat, animal.lng);
-                const mapOid = await insertLargeObject(map);
-                await runQuery<void>("UPDATE animal_location SET map_image = $1 WHERE id = (SELECT location_id FROM animals WHERE id = $2)", [mapOid, animalId]);                
+                // const map = await this.generateMapImage(animal.lat, animal.lng);
+                // const mapOid = await insertLargeObject(map);
+                // await runQuery<void>("UPDATE animal_location SET map_image = $1 WHERE id = (SELECT location_id FROM animals WHERE id = $2)", [mapOid, animalId]);                
             } catch(e) {
                 // If image insert fails, rollback all data previously inserted
                 await runQuery(deleteAnimalQuery, [animalId]);
