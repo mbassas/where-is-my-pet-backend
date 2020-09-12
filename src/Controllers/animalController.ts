@@ -50,7 +50,9 @@ async function getAnimalImage({params}: ApiRequest, res: Response) {
             params.imageName
         );
         
+        // the images are stored in cache for one year
         res
+            .header("Cache-Control", "max-age=31536000")
             .contentType("image/png")
             .send(image);
 
