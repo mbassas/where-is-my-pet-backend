@@ -34,7 +34,8 @@ select
     al.location,
     al.lng,
     al.lat,
-    ai.image_name
+    ai.image_name,
+    a.recovered
     ${(lat && lng) ? `, calculate_distance(al.lat, al.lng, ${lat}, ${lng}) as distance` : ""}
 from animals a
     left join animal_species aspec on a.species = aspec.id

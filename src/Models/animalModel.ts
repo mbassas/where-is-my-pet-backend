@@ -6,6 +6,7 @@ import path from "path";
 import sharp from "sharp";
 import {v4 as uuid} from "uuid";
 import getAnimalsQuery, { IGetAnimalQueryParams } from "../db/queries/animals/get_animals";
+import updateAnimalQuery from "../db/queries/animals/update_animal";
 
 const insertAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal.sql"), "utf8");
 const insertAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal_image.sql"), "utf8");
@@ -77,8 +78,10 @@ class AnimalModel {
             console.error(e);
             throw e;
         } finally {
+
             // Cleanup uploads directory
             for (let i = 0; i < animalImages.length; i++) {
+                // delete the file from disk
                 fs.unlinkSync(animalImages[i].path);
                 fs.unlinkSync(`${animalImages[i].path}-resized`);
             }
@@ -107,6 +110,29 @@ class AnimalModel {
             mimetype: "image/png"
         }
     }
+
+    public async UpdateAnimal (animalId: number, params: Partial<Animal>) {
+
+        try {
+            const animal = await this.GetAnimalById(animalId);
+            const updatedAnimal = {
+                ...animal,
+                ...params,
+            };
+
+            await runQuery<Animal>(
+            updateAnimalQuery,
+            [
+                updatedAnimal.id,
+                updatedAnimal.recovered
+            ]
+        ); 
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+       
+    };
 }
 
 export default new AnimalModel();

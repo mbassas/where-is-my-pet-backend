@@ -10,6 +10,7 @@ export interface AnimalInput {
     lat: number;
     lng: number;
     location: string;
+    recovered: boolean;
 }
 
 export interface Animal extends AnimalInput {

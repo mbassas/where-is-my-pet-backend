@@ -1,12 +1,15 @@
 import { Response, Router } from "express";
 import animalModel from "../Models/animalModel";
-import { AnimalInput } from "../Entities/animal";
+import { AnimalInput, Animal } from "../Entities/animal";
 import Joi from "@hapi/joi";
 import { createValidator } from "express-joi-validation";
 import CustomError, { ErrorType } from "../Models/customErrors";
 import { ApiRequest } from "..";
 import forceLoginMiddleware from "../middleware/forceLoginMiddleware";
 import multer from "multer";
+import { runQuery } from "../db/database";
+import getUserByUsernameOrEmailQuery from "../db/queries/users/get_user_by_username_or_email";
+import { User } from "../Entities/user";
 
 const validator = createValidator();
 const upload = multer({dest: "uploads/"});
@@ -108,8 +111,31 @@ async function getAnimals({ query }: ApiRequest, res: Response) {
     }
 };
 
+async function updateAnimal (req: ApiRequest<Partial<Animal>>, res: Response) {
+    try {
+        const animal = await animalModel.GetAnimalById(parseInt(req.params.id));
+
+        if (animal.user_id !== req.user.id) {
+            throw new CustomError(ErrorType.UNAUTHORIZED);
+        }
+        
+        await animalModel.UpdateAnimal(parseInt(req.params.id), req.body); 
+        res.sendStatus(200);
+       
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+
+};
+
 animalController.post("/", forceLoginMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
 animalController.get("/:id", getAnimalById);
+animalController.patch("/:id", updateAnimal);
+animalController.patch("/:id", forceLoginMiddleware, updateAnimal);
 animalController.get("/:id/:imageName.png", getAnimalImage);
 animalController.get("/", getAnimals);
 
