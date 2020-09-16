@@ -16,7 +16,7 @@ class ImageRecognitionModel {
             image: {
                 content: fs.readFileSync(imagePath)
             },
-            features:  [{type: "OBJECT_LOCALIZATION"}, {type: "LABEL_DETECTION"}, {type: "IMAGE_PROPERTIES"}, {type: "TYPE_UNSPECIFIED"} ]
+            features:  [{type: "LABEL_DETECTION"}]
         }
         const result = await client.annotateImage(request);
 

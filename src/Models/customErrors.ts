@@ -5,7 +5,8 @@ export enum ErrorType {
     INVALID_USERNAME_OR_EMAIL,
     INVALID_TOKEN,
     ANIMAL_IMAGES_REQUIRED,
-    NOT_FOUND
+    NOT_FOUND,
+    UNAUTHORIZED
 }
 
 const errorDetails = {
@@ -37,6 +38,10 @@ const errorDetails = {
         status: 404,
         message: ""
     },
+    [ErrorType.UNAUTHORIZED]: {
+        status: 401,
+        message: "",
+    }
 }
 
 class CustomError extends Error {

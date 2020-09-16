@@ -92,7 +92,8 @@ function getUserInfo(req: ApiRequest, res: Response) {
         res.send({
             username: req.user.username,
             name: req.user.name,
-            surname: req.user.surname
+            surname: req.user.surname,
+            id: req.user.id
         });
         return;
     }

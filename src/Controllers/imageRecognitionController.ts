@@ -1,9 +1,9 @@
 import { Router, Response } from "express";
 import { ApiRequest } from "..";
 import CustomError, { ErrorType } from "../Models/customErrors";
-import forceLoginMiddleware from "../middleware/forceLoginMiddleware";
 import multer from "multer";
 import imageRecognitionModel from "../Models/imageRecognitionModel";
+import fs from "fs";
 
 const upload = multer({dest: "uploads/"});
 
@@ -23,6 +23,9 @@ async function getAnimalInfo (req: ApiRequest, res: Response) {
         } else {
             res.sendStatus(500);
         }
+    } finally {
+        // Remove the image from disk
+        fs.unlink(req.file.path, () => {});
     }
 };
 
