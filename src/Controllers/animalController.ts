@@ -134,7 +134,6 @@ async function updateAnimal (req: ApiRequest<Partial<Animal>>, res: Response) {
 
 animalController.post("/", forceLoginMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
 animalController.get("/:id", getAnimalById);
-animalController.patch("/:id", updateAnimal);
 animalController.patch("/:id", forceLoginMiddleware, updateAnimal);
 animalController.get("/:id/:imageName.png", getAnimalImage);
 animalController.get("/", getAnimals);
