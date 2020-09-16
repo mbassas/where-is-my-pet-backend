@@ -20,7 +20,9 @@ class ImageRecognitionModel {
         }
         const result = await client.annotateImage(request);
 
-        const animal: Partial<Animal> = {};
+        const animal: Partial<Animal> = {
+            species: "OTHER"
+        };
 
         const species = await speciesModel.GetAllSpecies();
 
