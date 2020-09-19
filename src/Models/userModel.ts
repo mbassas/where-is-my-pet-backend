@@ -2,15 +2,18 @@ import bcrypt from 'bcrypt';
 import { runQuery } from '../db/database';
 import insertUserQuery from '../db/queries/users/insert_user';
 import { UserInput, User } from '../Entities/user';
-import getUserByUsernameOrEmailQuery from '../db/queries/users/get_user_by_username_or_email';
 import CustomError, { ErrorType } from './customErrors';
 import JWT from 'jsonwebtoken';
 import config from '../config';
-import getUserByIdQuery from '../db/queries/users/get_user_by_id';
 import crypto from 'crypto';
 import Config from '../config';
 import resetPasswordQuery from '../db/queries/users/reset_password';
 import sendEmail from './emailModel';
+import fs from "fs";
+import path from "path";
+
+const getUserByIdQuery = fs.readFileSync(path.resolve(__dirname, '../db/queries/users/get_user_by_id'), "utf8");
+const getUserByUsernameOrEmailQuery = fs.readFileSync(path.resolve(__dirname, '../db/queries/users/get_user_by_username_or_email'), "utf8");
 
 class UserModel {
     private _fieldsToEncrypt: Array<keyof UserInput> = ["email", "name", "surname", "username", "phone"]

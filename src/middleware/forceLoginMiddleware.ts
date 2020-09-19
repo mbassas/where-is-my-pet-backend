@@ -7,6 +7,12 @@ function forceLoginMiddleware(req: ApiRequest, res: Response, next: NextFunction
         return;
     }
 
+    if(req.user.status === "Banned" || req.user.status === "Suspicious") {
+        // 403: Forbidden
+        res.sendStatus(403);
+        return;
+    }
+
     next();
 }
 

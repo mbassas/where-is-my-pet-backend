@@ -7,9 +7,6 @@ import CustomError, { ErrorType } from "../Models/customErrors";
 import { ApiRequest } from "..";
 import forceLoginMiddleware from "../middleware/forceLoginMiddleware";
 import multer from "multer";
-import { runQuery } from "../db/database";
-import getUserByUsernameOrEmailQuery from "../db/queries/users/get_user_by_username_or_email";
-import { User } from "../Entities/user";
 
 const validator = createValidator();
 const upload = multer({dest: "uploads/"});
