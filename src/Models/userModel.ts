@@ -14,6 +14,7 @@ import path from "path";
 
 const getUserByIdQuery = fs.readFileSync(path.resolve(__dirname, '../db/queries/users/get_user_by_id'), "utf8");
 const getUserByUsernameOrEmailQuery = fs.readFileSync(path.resolve(__dirname, '../db/queries/users/get_user_by_username_or_email'), "utf8");
+const getUserRolesQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/users/get_user_roles.sql"), "utf8");
 
 class UserModel {
     private _fieldsToEncrypt: Array<keyof UserInput> = ["email", "name", "surname", "username", "phone"]
@@ -118,6 +119,7 @@ class UserModel {
     private _getToken(user: User, secret: string, expiration: string): string {
         return JWT.sign({ id: user.id }, secret, { expiresIn: expiration });
     }
+    
     public async GetUserFromToken(token: string, secret: string): Promise<User> {
         const { id } = JWT.verify(token, secret) as { id: number };
 
@@ -129,8 +131,27 @@ class UserModel {
             return null;
         }
 
-        return this._decryptUser(queryResult.rows[0])
+        let user = this._decryptUser(queryResult.rows[0]);
 
+        user.roles = await this._getRoles(user.id);
+
+        return user;
+
+    }
+
+    private async _getRoles(userId: number): Promise<string[]> {
+        const roles = await  runQuery<{role: string}>(getUserRolesQuery, [userId]);
+
+        const defaultRoles = ["User"];
+
+        if (roles.rowCount === 0) {
+            return defaultRoles;
+        }
+
+        return [
+            ...defaultRoles,
+            ...roles.rows.map(v => v.role),
+        ]
     }
 
     //#region Crypto

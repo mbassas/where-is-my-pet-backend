@@ -10,5 +10,6 @@ export interface UserInput {
 
 export interface User extends UserInput {
     id: number;
+    roles: string[];
 }
 

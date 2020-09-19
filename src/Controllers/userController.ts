@@ -94,7 +94,8 @@ function getUserInfo(req: ApiRequest, res: Response) {
             name: req.user.name,
             surname: req.user.surname,
             id: req.user.id,
-            status: req.user.status
+            status: req.user.status,
+            roles: req.user.roles
         });
         return;
     }
