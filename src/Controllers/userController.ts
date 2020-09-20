@@ -5,6 +5,7 @@ import CustomError from "../Models/customErrors";
 import Joi from "@hapi/joi";
 import { createValidator } from "express-joi-validation";
 import { ApiRequest } from "..";
+import forceAdminMiddleware from "../middleware/forceAdminMiddleware";
 
 const validator = createValidator();
 
@@ -94,6 +95,7 @@ function getUserInfo(req: ApiRequest, res: Response) {
             name: req.user.name,
             surname: req.user.surname,
             id: req.user.id,
+            status: req.user.status,
             roles: req.user.roles
         });
         return;
@@ -102,10 +104,44 @@ function getUserInfo(req: ApiRequest, res: Response) {
     res.sendStatus(204);
 }
 
+async function getUsersByStatus ({query}: ApiRequest, res: Response) {
+    try {
+        let status = typeof query.status === "string" ? [query.status] : query.status;
+        const users = await userModel.GetUsersByStatus(status);
+
+        res.status(200).send(users);
+
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+
+}
+
+async function updateUser (req: ApiRequest<Partial<User>>, res: Response) {
+    try {
+        await userModel.UpdateUser(parseInt(req.params.id), req.body); 
+        res.sendStatus(200);
+       
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+
+};
+
 userController.get("/", getUserInfo);
 userController.post("/sign-up", validator.body(signUpBodySchema), signUp);
 userController.post("/sign-in", validator.body(signInBodySchema), signIn);
 userController.post("/reset-password-email", validator.body(sendResetPasswordEmailBodySchema), sendResetPasswordEmail);
 userController.post("/reset-password", validator.body(resetPasswordBodySchema), resetPassword);
+userController.get("/by-status", forceAdminMiddleware, getUsersByStatus);
+userController.patch("/:id", forceAdminMiddleware, updateUser);
 
 export default userController;

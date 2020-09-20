@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import { ApiRequest } from "..";
 
-function forceLoginMiddleware(req: ApiRequest, res: Response, next: NextFunction) {
+function forceAdminMiddleware(req: ApiRequest, res: Response, next: NextFunction) {
     if (!req.user) {
         res.sendStatus(401);
         return;
@@ -13,7 +13,12 @@ function forceLoginMiddleware(req: ApiRequest, res: Response, next: NextFunction
         return;
     }
 
-    next();
+    if(req.user.roles.includes("Admin")) {
+        next();
+        return;
+    }
+
+    res.sendStatus(403);
 }
 
-export default forceLoginMiddleware;
+export default forceAdminMiddleware;

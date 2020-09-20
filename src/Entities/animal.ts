@@ -11,6 +11,7 @@ export interface AnimalInput {
     lng: number;
     location: string;
     recovered: boolean;
+    published: boolean;
 }
 
 export interface Animal extends AnimalInput {

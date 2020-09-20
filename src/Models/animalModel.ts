@@ -7,6 +7,10 @@ import sharp from "sharp";
 import {v4 as uuid} from "uuid";
 import getAnimalsQuery, { IGetAnimalQueryParams } from "../db/queries/animals/get_animals";
 import updateAnimalQuery from "../db/queries/animals/update_animal";
+import imageRecognitionModel from "./imageRecognitionModel";
+import sendEmail from "./emailModel";
+import CustomError, { ErrorType } from "./customErrors";
+import userModel from "./userModel";
 
 const insertAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal.sql"), "utf8");
 const insertAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal_image.sql"), "utf8");
@@ -17,11 +21,12 @@ const deleteAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries
 class AnimalModel {
 
     public async GetAnimalById(id: number): Promise<Animal> {
+    
         const queryResult = await runQuery<Animal>(getAnimalByIdQuery, [
             id
         ]);
-        if (queryResult.rowCount !== 1) {
-            return null;
+        if (queryResult.rowCount !== 1 || !queryResult.rows[0].published) {
+            throw new CustomError(ErrorType.NOT_FOUND);
         }
         return queryResult.rows[0];
     };
@@ -32,7 +37,21 @@ class AnimalModel {
         return queryResult.rows;
     }
 
-    public async CreateAnimal(user: User, animal: AnimalInput, animalImages: Express.Multer.File[]): Promise<number> {
+    public async CreateAnimal(user: User, animal: AnimalInput, animalImages: Express.Multer.File[], imagePath: string ): Promise<number> {
+        
+        const unsafeContent = await imageRecognitionModel.hasInappropriateContent(imagePath);
+
+        if (unsafeContent) {
+            animal.published = false;
+            await sendEmail({
+                destinationEmail: user.email,
+                subject: "Suspicious content",
+                body: `<p>Hi ${user.name} ${user.surname},<p>Your content will be published once it has been evaluated by our team. Thanks for understanding.</p> <p>Best wishes, <br/>Where is my Pet team</p>`
+            });
+            user.status = "Suspicious";
+            await userModel.UpdateUser(user.id, user);
+        }
+
         try {
             const queryResult = await runQuery<Animal>(
                 insertAnimalQuery,
@@ -48,7 +67,8 @@ class AnimalModel {
                     animal.age,
                     animal.lat,
                     animal.lng,
-                    animal.location
+                    animal.location,
+                    animal.published
                 ]
             );
             const animalId = queryResult.rows[0].id;

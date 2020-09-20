@@ -15,8 +15,8 @@ select
     al.lng,
     al.lat,
     ai.image_name,
-    a.recovered
-    
+    a.recovered,
+    a.published
 from animals a
     left join animal_species aspec on a.species = aspec.id
     left join animal_breed ab on a.breed = ab.id

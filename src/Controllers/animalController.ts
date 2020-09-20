@@ -7,9 +7,6 @@ import CustomError, { ErrorType } from "../Models/customErrors";
 import { ApiRequest } from "..";
 import forceLoginMiddleware from "../middleware/forceLoginMiddleware";
 import multer from "multer";
-import { runQuery } from "../db/database";
-import getUserByUsernameOrEmailQuery from "../db/queries/users/get_user_by_username_or_email";
-import { User } from "../Entities/user";
 
 const validator = createValidator();
 const upload = multer({dest: "uploads/"});
@@ -34,7 +31,7 @@ async function createAnimal(req: ApiRequest<AnimalInput>, res: Response) {
         if (!Array.isArray(req.files) || req.files.length === 0) {
             throw new CustomError(ErrorType.ANIMAL_IMAGES_REQUIRED);
         }
-        const animalId = await animalModel.CreateAnimal(req.user, req.body, req.files as any);
+        const animalId = await animalModel.CreateAnimal(req.user, req.body, req.files as any, req.files[0].path);
         res.status(201).send({id: animalId});
     } catch (e) {
         console.error(e);
@@ -114,7 +111,7 @@ async function getAnimals({ query }: ApiRequest, res: Response) {
 async function updateAnimal (req: ApiRequest<Partial<Animal>>, res: Response) {
     try {
         const animal = await animalModel.GetAnimalById(parseInt(req.params.id));
-
+        
         if (animal.user_id !== req.user.id) {
             throw new CustomError(ErrorType.UNAUTHORIZED);
         }

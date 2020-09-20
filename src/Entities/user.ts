@@ -5,6 +5,7 @@ export interface UserInput {
     phone: string;
     username: string;
     password: string;
+    status: string;
 }
 
 export interface User extends UserInput {

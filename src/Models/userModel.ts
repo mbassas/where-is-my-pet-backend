@@ -1,12 +1,11 @@
 import bcrypt from 'bcrypt';
 import { runQuery } from '../db/database';
 import insertUserQuery from '../db/queries/users/insert_user';
+import updateUserQuery from '../db/queries/users/update_user';
 import { UserInput, User } from '../Entities/user';
-import getUserByUsernameOrEmailQuery from '../db/queries/users/get_user_by_username_or_email';
 import CustomError, { ErrorType } from './customErrors';
 import JWT from 'jsonwebtoken';
 import config from '../config';
-import getUserByIdQuery from '../db/queries/users/get_user_by_id';
 import crypto from 'crypto';
 import Config from '../config';
 import resetPasswordQuery from '../db/queries/users/reset_password';
@@ -14,7 +13,10 @@ import sendEmail from './emailModel';
 import fs from "fs";
 import path from "path";
 
+const getUserByIdQuery = fs.readFileSync(path.resolve(__dirname, '../db/queries/users/get_user_by_id.sql'), "utf8");
+const getUserByUsernameOrEmailQuery = fs.readFileSync(path.resolve(__dirname, '../db/queries/users/get_user_by_username_or_email.sql'), "utf8");
 const getUserRolesQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/users/get_user_roles.sql"), "utf8");
+const getUserByStatusQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/users/get_user_by_status.sql"), "utf8");
 
 class UserModel {
     private _fieldsToEncrypt: Array<keyof UserInput> = ["email", "name", "surname", "username", "phone"]
@@ -96,7 +98,7 @@ class UserModel {
         await sendEmail({
             destinationEmail: user.email,
             subject: "Reset your password",
-            body: `<p>Hi ${user.name} ${user.surname},</p> <p>click the link below to restart your password:</p> <p><a href="${resetPasswordLink}">Reset Link</a></p>`
+            body: `<p>Hi ${user.name} ${user.surname},</p> <p>click the link below to restart your password:</p> <p><a href="${resetPasswordLink}">Reset Link</a></p> <p>Where is my Pet team</p>`
         });
     }
 
@@ -152,6 +154,59 @@ class UserModel {
             ...defaultRoles,
             ...roles.rows.map(v => v.role),
         ]
+    }
+
+    public async GetUsersByStatus(status: string[]): Promise<Partial<User>[]> {
+        const users = await runQuery<User>(getUserByStatusQuery, [status]);
+
+        if (users.rowCount === 0) {
+            return [];
+        }
+    
+        return users.rows
+            .map( i => this._decryptUser(i))
+            .map(u => ({
+                id: u.id,
+                username: u.username,
+                status: u.status
+            }));
+    }
+
+    public async UpdateUser(userId: number, params: Partial<User>) {
+        try {
+            const user = await runQuery<User>(getUserByIdQuery, [
+                userId
+            ]);
+
+            if (user.rowCount !== 1) {
+                throw new CustomError(ErrorType.NOT_FOUND);
+            }
+
+            const decryptedUser = this._decryptUser(user.rows[0]);
+
+            const updatedUser = {
+                ...decryptedUser,
+                ...params,
+            };
+
+            if (user.rows[0].status !== "Banned" && updatedUser.status === "Banned") {
+                await sendEmail({
+                    destinationEmail: updatedUser.email,
+                    subject: "Your account has been suspended",
+                    body: `<p>Hi ${updatedUser.name} ${updatedUser.surname},<p>After revising your content, we decided to block your account. You will not be able to upload more content, but you can still access and view the website. We are truly sorry to take this action, we hope you can understand the reasons.</p> <p>Best wishes, <br/>Where is my Pet team</p>`
+                });
+            }
+
+            await runQuery<User>(updateUserQuery,
+            [
+                updatedUser.id,
+                updatedUser.status
+            ]
+        ); 
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
     }
 
     //#region Crypto
