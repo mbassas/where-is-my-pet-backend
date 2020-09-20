@@ -105,7 +105,6 @@ function getUserInfo(req: ApiRequest, res: Response) {
 }
 
 async function getUsersByStatus ({query}: ApiRequest, res: Response) {
-    console.log(query);
     try {
         let status = typeof query.status === "string" ? [query.status] : query.status;
         const users = await userModel.GetUsersByStatus(status);
@@ -122,11 +121,27 @@ async function getUsersByStatus ({query}: ApiRequest, res: Response) {
 
 }
 
+async function updateUser (req: ApiRequest<Partial<User>>, res: Response) {
+    try {
+        await userModel.UpdateUser(parseInt(req.params.id), req.body); 
+        res.sendStatus(200);
+       
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+
+};
+
 userController.get("/", getUserInfo);
 userController.post("/sign-up", validator.body(signUpBodySchema), signUp);
 userController.post("/sign-in", validator.body(signInBodySchema), signIn);
 userController.post("/reset-password-email", validator.body(sendResetPasswordEmailBodySchema), sendResetPasswordEmail);
 userController.post("/reset-password", validator.body(resetPasswordBodySchema), resetPassword);
 userController.get("/by-status", forceAdminMiddleware, getUsersByStatus);
+userController.patch("/:id", forceAdminMiddleware, updateUser);
 
 export default userController;
