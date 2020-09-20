@@ -15,7 +15,7 @@ function getAnimalsQuery({
     breed = undefined,
     lat = undefined,
     lng = undefined,
-    status = undefined,
+    status = undefined
 }: IGetAnimalQueryParams) {
     let query = `
 select
@@ -44,11 +44,13 @@ from animals a
     left join animal_size asize on a.size = asize.id
     left join animal_gender ag on a.gender = ag.id
     left join animal_images ai on ai.animal_id = a.id
-    left join animal_location al on a.location_id = al.id`;
+    left join animal_location al on a.location_id = al.id
+WHERE
+    a.published = TRUE`;
 
     const hasWhere = species || breed || status;
     if (hasWhere) {
-        query += `\nwhere`;
+        query += `\nAND`;
     }
 
     if (species) {
@@ -75,5 +77,4 @@ from animals a
 
     return query;
 };
-
 export default getAnimalsQuery;

@@ -5,6 +5,7 @@ import CustomError from "../Models/customErrors";
 import Joi from "@hapi/joi";
 import { createValidator } from "express-joi-validation";
 import { ApiRequest } from "..";
+import forceAdminMiddleware from "../middleware/forceAdminMiddleware";
 
 const validator = createValidator();
 
@@ -103,10 +104,29 @@ function getUserInfo(req: ApiRequest, res: Response) {
     res.sendStatus(204);
 }
 
+async function getUsersByStatus ({query}: ApiRequest, res: Response) {
+    console.log(query);
+    try {
+        let status = typeof query.status === "string" ? [query.status] : query.status;
+        const users = await userModel.GetUsersByStatus(status);
+
+        res.status(200).send(users);
+
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+
+}
+
 userController.get("/", getUserInfo);
 userController.post("/sign-up", validator.body(signUpBodySchema), signUp);
 userController.post("/sign-in", validator.body(signInBodySchema), signIn);
 userController.post("/reset-password-email", validator.body(sendResetPasswordEmailBodySchema), sendResetPasswordEmail);
 userController.post("/reset-password", validator.body(resetPasswordBodySchema), resetPassword);
+userController.get("/by-status", forceAdminMiddleware, getUsersByStatus);
 
 export default userController;

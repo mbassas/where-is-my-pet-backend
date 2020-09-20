@@ -74,6 +74,25 @@ class ImageRecognitionModel {
         return animal;
     }
 
+    public async hasInappropriateContent (imagePath: string): Promise<boolean> {
+        const client = new vision.ImageAnnotatorClient();
+
+        const [result] = await client.safeSearchDetection(imagePath);
+
+        if (!result.safeSearchAnnotation) {
+            return false;
+        }
+        
+        const likelyUnsafe = Object.entries(result.safeSearchAnnotation).find(([key, value]) => {
+            if (["LIKELY", "VERY_LIKELY"].includes(value) && key !== "spoof") {
+                return true;
+            }
+        });
+
+        return likelyUnsafe ? true : false;
+
+    }
+
 }
 
 export default new ImageRecognitionModel();
