@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
 import CustomError from "../Models/customErrors";
 import breedModel from "../Models/breedModel";
 import { ApiRequest } from "..";
@@ -18,6 +18,13 @@ async function getBreed({ params }: ApiRequest, res: Response) {
     }
 }
 
+/**
+ * GET /breeds/{species}
+ * @tags Breeds
+ * @summary Gets all breeds of an specific species
+ * @param {string} species.path
+ * @return {array<string>} 200 - Success
+ */
 breedController.get("/:species", getBreed);
 
 export default breedController;

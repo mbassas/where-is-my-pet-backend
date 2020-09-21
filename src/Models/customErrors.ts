@@ -36,11 +36,11 @@ const errorDetails = {
     },
     [ErrorType.NOT_FOUND]: {
         status: 404,
-        message: ""
+        message: "Not found"
     },
     [ErrorType.UNAUTHORIZED]: {
         status: 401,
-        message: "",
+        message: "Unauthorized",
     }
 }
 

@@ -136,12 +136,129 @@ async function updateUser (req: ApiRequest<Partial<User>>, res: Response) {
 
 };
 
+/**
+ * Type definitions for this Controller
+ * 
+ * @typedef {object} User
+ * @property {string} name.required
+ * @property {string} surname.required
+ * @property {string} email.required
+ * @property {string} phone.required
+ * @property {string} username.required
+ * @property {string} password.required
+ */
+
+ /** 
+ * @typedef {object} SignUpParams
+ * @property {string} name.required
+ * @property {string} surname.required
+ * @property {string} email.required
+ * @property {string} phone.required
+ * @property {string} username.required
+ * @property {string} password.required
+ */
+
+/**
+ * @typedef {undefined} Empty
+ */
+
+/** 
+ * @typedef {object} SignUpResponse
+ * @property {string} token.required
+*/
+
+/** 
+ * @typedef {object} SignInParams
+ * @property {string} username.required
+ * @property {string} password.required
+ */
+
+/** 
+ * @typedef {object} SignInResponse
+ * @property {string} token
+ */
+
+/** 
+ * @typedef {object} ResetPasswordEmailParams
+ * @property {string} usernameOrEmail.required
+*/
+
+/** 
+ * @typedef {object} ResetPasswordParams
+ * @property {string} token.required - A reset token obtained in the reset password email
+ * @property {string} newPassword.required - The new password
+ */
+
+/**
+ * GET /users
+ * @tags Users
+ * @summary Returns currently logged in use info 
+ * @return {User} 200 - Success
+ * @return {Empty} 204 - User not logged in
+ */
 userController.get("/", getUserInfo);
+
+/**
+ * POST /users/sign-up
+ * @summary Creates a new user
+ * @tags Users
+ * @param {SignUpParams} request.body.required - Sign Up info - application/json
+ * @return {SignUpResponse} 200 - Success
+ * @return {string} 409 - Email or username already in use.
+ */
 userController.post("/sign-up", validator.body(signUpBodySchema), signUp);
+
+/**
+ * POST /users/sign-in
+ * @summary Gets an access token to identify a user
+ * @tags Users
+ * @param {SignInParams} request.body.required - Sign In info - application/json
+ * @return {SignInResponse} 200 - Success
+ * @return {string} 401 - Bad Credentials
+ */
 userController.post("/sign-in", validator.body(signInBodySchema), signIn);
+
+/**
+ * POST /users/reset-password-email
+ * @summary Requests a reset password email
+ * @tags Users
+ * @param {ResetPasswordEmailParams} request.body.required 
+ * @return {Empty} 200 - Success
+ * @return {string} 401 - Username or Email not found
+ */
 userController.post("/reset-password-email", validator.body(sendResetPasswordEmailBodySchema), sendResetPasswordEmail);
+
+/**
+ * POST /users/reset-password
+ * @summary Sets a new password to a user
+ * @tags Users
+ * @param {ResetPasswordParams} request.body.required
+ * @return {Empty} 200 - Success
+ * @return {string} 401 - Invalid token
+ */
 userController.post("/reset-password", validator.body(resetPasswordBodySchema), resetPassword);
+
+/**
+ * GET /users/by-status
+ * @summary Returns users by status
+ * @tags Users
+ * @param {string} status.query
+ * @return {array<User>} 200 - Success
+ * @return {string} 403 - Forbidden
+ * @return {string} 401 - Unauthorized
+ */
 userController.get("/by-status", forceAdminMiddleware, getUsersByStatus);
+
+/**
+ * PATCH /users/{id}
+ * @summary Updates a user
+ * @tags Users
+ * @param {User} id.path
+ * @return {Empty} 200 - Success
+ * @return {string} 404 - Not found
+ * @return {string} 403 - Forbidden
+ * @return {string} 401 - Unauthorized
+ */
 userController.patch("/:id", forceAdminMiddleware, updateUser);
 
 export default userController;

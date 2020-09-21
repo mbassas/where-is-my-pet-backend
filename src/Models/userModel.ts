@@ -193,7 +193,7 @@ class UserModel {
                 await sendEmail({
                     destinationEmail: updatedUser.email,
                     subject: "Your account has been suspended",
-                    body: `<p>Hi ${updatedUser.name} ${updatedUser.surname},<p>After revising your content, we decided to block your account. You will not be able to upload more content, but you can still access and view the website. We are truly sorry to take this action, we hope you can understand the reasons.</p> <p>Best wishes, <br/>Where is my Pet team</p>`
+                    body: `<p>Hi ${updatedUser.name} ${updatedUser.surname},<p>After reviewing your content, we decided to block your account. You will not be able to upload more content, but you can still access and view the website. We are truly sorry to take this action, we hope you can understand the reasons.</p> <p>Best wishes, <br/>Where is my Pet team</p>`
                 });
             }
 

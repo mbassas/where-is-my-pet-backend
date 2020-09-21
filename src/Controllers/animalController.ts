@@ -129,11 +129,90 @@ async function updateAnimal (req: ApiRequest<Partial<Animal>>, res: Response) {
 
 };
 
-animalController.post("/", forceLoginMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
-animalController.get("/:id", getAnimalById);
-animalController.patch("/:id", forceLoginMiddleware, updateAnimal);
-animalController.get("/:id/:imageName.png", getAnimalImage);
-animalController.get("/", getAnimals);
+/**
+ * Type definitions for this Controller
+ * 
+ * @typedef {object} Animal
+ * @property {string} status.required - enum:LOST,FOUND
+ * @property {string} species.required - enum:CAT,DOG,OTHER
+ * @property {string} breed
+ * @property {string} size - enum:SMALL,MEDIUM,BIG
+ * @property {string} color
+ * @property {string} name
+ * @property {string} gender - enum:MALE,FEMALE
+ * @property {number} age
+ * @property {number} lat.required
+ * @property {number} lng.required
+ * @property {string} location.required
+ * @property {string} images.required - The animal image - binary
+ */
 
+/** 
+ * @typedef {object} CreateAnimalResponse
+ * @property {number} id
+ */
+
+ /**
+ * @typedef {undefined} Empty
+ */
+
+ /**
+  * POST /animals
+  * @summary Creates a new animal
+  * @tags Animals
+  * @param {Animal} request.body.required - The Animal - multipart/form-data
+  * @return {CreateAnimalResponse} 201 - Created
+  * @return {string} 400 - Images is required
+  * @return {string} 401 - Unauthorized
+  * @return {string} 403 - Forbidden
+  */
+animalController.post("/", forceLoginMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
+
+/**
+ * GET /animals/{id} 
+ * @summary Returns a specific animal
+ * @tags Animals
+ * @param {number} id.path
+ * @return {Animal} 200 - Success
+ * @return {string} 404 - Not found
+ */
+animalController.get("/:id", getAnimalById);
+
+/**
+ * PATCH /animals/{id} 
+ * @summary Updates an animal
+ * @tags Animals
+ * @param {number} id.path
+ * @param {Animal} request.body.required
+ * @return {Empty} 200 - Success
+ * @return {string} 404 - Not found
+ * @return {string} 401 - Unauthorized
+ */
+animalController.patch("/:id", forceLoginMiddleware, updateAnimal);
+
+/**
+ * GET /animals/{id}/{imageName}.png
+ * @summary Gets an animal image
+ * @tags Animals
+ * @param {number} id.path
+ * @param {string} imageName.path
+ * @return {string} 200 - Success - image/png
+ * @return {string} 404 - Not Found
+ */
+animalController.get("/:id/:imageName.png", getAnimalImage);
+
+/**
+ * GET /animals
+ * @tags Animals
+ * @param {integer} start.query
+ * @param {integer} count.query
+ * @param {string} species.query - enum:CAT,DOG,OTHER
+ * @param {string} breed.query
+ * @param {string} status.query - enum:LOST,FOUND
+ * @param {number} lat.query
+ * @param {number} lng.query
+ * @return {array<Animal>} 200 - Success
+ */
+animalController.get("/", getAnimals);
 
 export default animalController;
