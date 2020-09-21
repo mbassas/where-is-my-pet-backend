@@ -17,6 +17,12 @@ async function getSpecies(req: Request, res: Response) {
     }
 }
 
+/**
+ * GET /species
+ * @tags Species
+ * @summary Gets all species
+ * @return {array<string>} 200 - Success
+ */
 speciesController.get("/", getSpecies);
 
 export default speciesController;

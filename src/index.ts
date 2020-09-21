@@ -10,8 +10,11 @@ import speciesController from './Controllers/speciesController';
 import breedController from './Controllers/breedController';
 import imageRecognitionController from './Controllers/imageRecognitionController';
 import compression from 'compression';
+import expressJSDocSwagger from 'express-jsdoc-swagger';
+import swaggerConfig from './swagger.config';
 
 const app = express();
+expressJSDocSwagger(app)(swaggerConfig);
 
 export interface ApiRequest<T = any> extends express.Request {
     body: T;
@@ -26,7 +29,7 @@ app.use(authMiddleware);
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-    res.send('hello world');
+    res.send(`<h1>Where is my pet backend</h1><p>See docs <a href="/api-docs">here</a>.`);
 });
 
 app.listen(Config.PORT, () => {

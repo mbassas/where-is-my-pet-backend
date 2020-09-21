@@ -117,7 +117,7 @@ class AnimalModel {
 
             return readLargeObject(queryResult.rows[0].image);
         } catch (e) {
-
+            throw new CustomError(ErrorType.NOT_FOUND);
         }
     }
 

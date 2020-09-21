@@ -57,7 +57,7 @@ class ImageRecognitionModel {
         for (let i = 0; i < result[0].labelAnnotations.length; i++) {
             const label = result[0].labelAnnotations[i];
             
-            if (!animal.species && isSpecies(label.description.toUpperCase())) {
+            if (animal.species === "OTHER" && isSpecies(label.description.toUpperCase())) {
                 animal.species = label.description.toUpperCase();
                 continue;
             }
@@ -66,7 +66,7 @@ class ImageRecognitionModel {
                 animal.breed = await getBreedMatch(label.description, animal.species);
             }
 
-            if (animal.species && animal.breed) {
+            if (animal.species !== "OTHER" && animal.breed) {
                 break;
             }
         }
