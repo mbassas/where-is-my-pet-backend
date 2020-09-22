@@ -41,6 +41,7 @@ class AnimalModel {
         
         const unsafeContent = await imageRecognitionModel.hasInappropriateContent(imagePath);
 
+        animal.published = true;
         if (unsafeContent) {
             animal.published = false;
             await sendEmail({
