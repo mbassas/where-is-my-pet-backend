@@ -104,6 +104,9 @@ function getUserInfo(req: ApiRequest, res: Response) {
     res.sendStatus(204);
 }
 
+const getUsersByStatusQuerySchema = Joi.object({
+    status: Joi.alternatives().try(Joi.array().items(Joi.string()), Joi.string()).required(),
+});
 async function getUsersByStatus ({query}: ApiRequest, res: Response) {
     try {
         let status = typeof query.status === "string" ? [query.status] : query.status;
@@ -121,6 +124,12 @@ async function getUsersByStatus ({query}: ApiRequest, res: Response) {
 
 }
 
+const updateUserParamsSchema = Joi.object({
+    id: Joi.number().integer().required(), 
+});
+const updateUserBodySchema = Joi.object({
+    status: Joi.string().required()
+});
 async function updateUser (req: ApiRequest<Partial<User>>, res: Response) {
     try {
         await userModel.UpdateUser(parseInt(req.params.id), req.body); 
@@ -133,7 +142,6 @@ async function updateUser (req: ApiRequest<Partial<User>>, res: Response) {
             res.sendStatus(500);
         }
     }
-
 };
 
 /**
@@ -247,7 +255,7 @@ userController.post("/reset-password", validator.body(resetPasswordBodySchema), 
  * @return {string} 403 - Forbidden
  * @return {string} 401 - Unauthorized
  */
-userController.get("/by-status", forceAdminMiddleware, getUsersByStatus);
+userController.get("/by-status", forceAdminMiddleware, validator.query(getUsersByStatusQuerySchema), getUsersByStatus);
 
 /**
  * PATCH /users/{id}
@@ -259,6 +267,6 @@ userController.get("/by-status", forceAdminMiddleware, getUsersByStatus);
  * @return {string} 403 - Forbidden
  * @return {string} 401 - Unauthorized
  */
-userController.patch("/:id", forceAdminMiddleware, updateUser);
+userController.patch("/:id", forceAdminMiddleware, validator.params(updateUserParamsSchema), validator.body(updateUserBodySchema), updateUser);
 
 export default userController;

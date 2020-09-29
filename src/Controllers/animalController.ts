@@ -43,6 +43,10 @@ async function createAnimal(req: ApiRequest<AnimalInput>, res: Response) {
     }
 };
 
+const getAnimalImageParamsSchema = Joi.object({
+    id: Joi.number().integer().required(),
+    imageName: Joi.string().required(),
+});
 async function getAnimalImage({params}: ApiRequest, res: Response) {
     try {
         const image = await animalModel.GetImage(
@@ -65,6 +69,9 @@ async function getAnimalImage({params}: ApiRequest, res: Response) {
     }
 }
 
+const getAnimalByIdParamsSchema = Joi.object({
+    id: Joi.number().integer().required(),
+});
 async function getAnimalById({ params }: ApiRequest, res: Response) {
     try {
         const animal = await animalModel.GetAnimalById(parseInt(params.id));
@@ -78,6 +85,15 @@ async function getAnimalById({ params }: ApiRequest, res: Response) {
     }
 };
 
+const getAnimalsQuerySchema = Joi.object({
+    start: Joi.number().integer(),
+    count: Joi.number().integer(),
+    species: Joi.string(),
+    breed: Joi.string(),
+    status: Joi.string(),
+    lat: Joi.number(),
+    lng: Joi.number(),
+});
 async function getAnimals({ query }: ApiRequest, res: Response) {
     const start = parseInt(query.start);
     const count = parseInt(query.count);
@@ -108,6 +124,23 @@ async function getAnimals({ query }: ApiRequest, res: Response) {
     }
 };
 
+const updateAnimalParamsSchema = Joi.object({
+    id: Joi.number().integer().required(),
+});
+const updateAnimalBodySchema = Joi.object({
+    status: Joi.string(),
+    species: Joi.string(),
+    breed: Joi.string(),
+    size: Joi.string(),
+    color: Joi.string(),
+    name: Joi.string(),
+    gender: Joi.string(),
+    age: Joi.number(),
+    lat: Joi.number(),
+    lng: Joi.number(),
+    location: Joi.string(),
+    recovered: Joi.boolean()
+});
 async function updateAnimal (req: ApiRequest<Partial<Animal>>, res: Response) {
     try {
         const animal = await animalModel.GetAnimalById(parseInt(req.params.id));
@@ -176,7 +209,7 @@ animalController.post("/", forceLoginMiddleware, upload.array("images"), validat
  * @return {Animal} 200 - Success
  * @return {string} 404 - Not found
  */
-animalController.get("/:id", getAnimalById);
+animalController.get("/:id", validator.params(getAnimalByIdParamsSchema), getAnimalById);
 
 /**
  * PATCH /animals/{id} 
@@ -188,7 +221,7 @@ animalController.get("/:id", getAnimalById);
  * @return {string} 404 - Not found
  * @return {string} 401 - Unauthorized
  */
-animalController.patch("/:id", forceLoginMiddleware, updateAnimal);
+animalController.patch("/:id", forceLoginMiddleware, validator.params(updateAnimalParamsSchema), validator.body(updateAnimalBodySchema), updateAnimal);
 
 /**
  * GET /animals/{id}/{imageName}.png
@@ -199,7 +232,7 @@ animalController.patch("/:id", forceLoginMiddleware, updateAnimal);
  * @return {string} 200 - Success - image/png
  * @return {string} 404 - Not Found
  */
-animalController.get("/:id/:imageName.png", getAnimalImage);
+animalController.get("/:id/:imageName.png", validator.params(getAnimalImageParamsSchema), getAnimalImage);
 
 /**
  * GET /animals
@@ -213,6 +246,6 @@ animalController.get("/:id/:imageName.png", getAnimalImage);
  * @param {number} lng.query
  * @return {array<Animal>} 200 - Success
  */
-animalController.get("/", getAnimals);
+animalController.get("/", validator.query(getAnimalsQuerySchema), getAnimals);
 
 export default animalController;
