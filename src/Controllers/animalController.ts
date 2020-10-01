@@ -198,6 +198,7 @@ async function updateAnimal (req: ApiRequest<Partial<Animal>>, res: Response) {
   * @return {string} 400 - Images is required
   * @return {string} 401 - Unauthorized
   * @return {string} 403 - Forbidden
+  * @security BearerToken
   */
 animalController.post("/", forceLoginMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
 
@@ -220,6 +221,7 @@ animalController.get("/:id", validator.params(getAnimalByIdParamsSchema), getAni
  * @return {Empty} 200 - Success
  * @return {string} 404 - Not found
  * @return {string} 401 - Unauthorized
+ * @security BearerToken
  */
 animalController.patch("/:id", forceLoginMiddleware, validator.params(updateAnimalParamsSchema), validator.body(updateAnimalBodySchema), updateAnimal);
 

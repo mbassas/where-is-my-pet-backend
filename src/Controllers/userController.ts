@@ -6,6 +6,8 @@ import Joi from "@hapi/joi";
 import { createValidator } from "express-joi-validation";
 import { ApiRequest } from "..";
 import forceAdminMiddleware from "../middleware/forceAdminMiddleware";
+import sendEmail from "../Models/emailModel";
+import forceLoginMiddleware from "../middleware/forceLoginMiddleware";
 
 const validator = createValidator();
 
@@ -144,6 +146,52 @@ async function updateUser (req: ApiRequest<Partial<User>>, res: Response) {
     }
 };
 
+const contactUserParamsSchema = Joi.object({
+    id: Joi.number().integer().required(), 
+});
+const contactUserBodySchema = Joi.object({
+    message: Joi.string().required(),
+    phone: Joi.boolean().required(),
+    email: Joi.boolean().required()
+});
+async function contactUser (req: ApiRequest<{message: string, phone: boolean, email: boolean}>, res: Response) {
+    try {
+        const sender = req.user;
+        const receiver = await userModel.GetUserById(parseInt(req.params.id));
+
+        let body = `<p>Hi ${receiver.name} ${receiver.surname},</p><p>You received the following message from ${sender.name} ${sender.surname}:</p> <hr></hr> <p>${req.body.message}</p>`;
+
+        if (req.body.phone || req.body.email) {
+            body += `<b>Contact details</b><ul>`
+
+            if (req.body.phone) {
+                body += `<li>Phone Number: ${sender.phone}</li>`;
+            }
+            if (req.body.email) {
+                body += `<li>Email: ${sender.email}</li>`;
+            }
+            body += "</ul>";
+        }
+
+        body+="<br/><p>Where is my Pet team</p>";
+
+        await sendEmail({
+            destinationEmail: receiver.email,
+            subject: "You have a new message",
+            body: body
+        });
+
+        res.sendStatus(200);
+       
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+};
+
 /**
  * Type definitions for this Controller
  * 
@@ -197,12 +245,20 @@ async function updateUser (req: ApiRequest<Partial<User>>, res: Response) {
  * @property {string} newPassword.required - The new password
  */
 
+ /**
+  * @typedef {object} ContactParams
+  * @property {boolean} phone.required
+  * @property {boolean} email.required
+  * @property {string} message.required
+  */
+
 /**
  * GET /users
  * @tags Users
  * @summary Returns currently logged in use info 
  * @return {User} 200 - Success
  * @return {Empty} 204 - User not logged in
+ * @security BearerToken
  */
 userController.get("/", getUserInfo);
 
@@ -254,6 +310,7 @@ userController.post("/reset-password", validator.body(resetPasswordBodySchema), 
  * @return {array<User>} 200 - Success
  * @return {string} 403 - Forbidden
  * @return {string} 401 - Unauthorized
+ * @security BearerToken
  */
 userController.get("/by-status", forceAdminMiddleware, validator.query(getUsersByStatusQuerySchema), getUsersByStatus);
 
@@ -261,12 +318,26 @@ userController.get("/by-status", forceAdminMiddleware, validator.query(getUsersB
  * PATCH /users/{id}
  * @summary Updates a user
  * @tags Users
- * @param {User} id.path
+ * @param {number} id.path
  * @return {Empty} 200 - Success
  * @return {string} 404 - Not found
  * @return {string} 403 - Forbidden
  * @return {string} 401 - Unauthorized
+ * @security BearerToken
  */
 userController.patch("/:id", forceAdminMiddleware, validator.params(updateUserParamsSchema), validator.body(updateUserBodySchema), updateUser);
+
+/**
+ * POST /users/{id}/contact
+ * @summary Send email to a user
+ * @tags Users
+ * @param {number} id.path
+ * @param {ContactParams} request.body.required
+ * @return {Empty} 200 - Success
+ * @return {string} 404 - Not found
+ * @return {string} 401 - Unauthorized
+ * @security BearerToken
+ */
+userController.post("/:id/contact", validator.params(contactUserParamsSchema), validator.body(contactUserBodySchema), forceLoginMiddleware, contactUser);
 
 export default userController;
