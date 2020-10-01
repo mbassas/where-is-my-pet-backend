@@ -125,15 +125,10 @@ class UserModel {
     public async GetUserFromToken(token: string, secret: string): Promise<User> {
         const { id } = JWT.verify(token, secret) as { id: number };
 
-        const queryResult = await runQuery<User>(getUserByIdQuery, [
-            id
-        ]);
-
-        if (queryResult.rowCount !== 1) {
+        const user = await this.GetUserById(id);
+        if (!user) {
             return null;
         }
-
-        let user = this._decryptUser(queryResult.rows[0]);
 
         user.roles = await this._getRoles(user.id);
 
@@ -174,22 +169,18 @@ class UserModel {
 
     public async UpdateUser(userId: number, params: Partial<User>) {
         try {
-            const user = await runQuery<User>(getUserByIdQuery, [
-                userId
-            ]);
+            const user = await this.GetUserById(userId);
 
-            if (user.rowCount !== 1) {
+            if (!user) {
                 throw new CustomError(ErrorType.NOT_FOUND);
             }
 
-            const decryptedUser = this._decryptUser(user.rows[0]);
-
             const updatedUser = {
-                ...decryptedUser,
+                ...user,
                 ...params,
             };
 
-            if (user.rows[0].status !== "Banned" && updatedUser.status === "Banned") {
+            if (user.status !== "Banned" && updatedUser.status === "Banned") {
                 await sendEmail({
                     destinationEmail: updatedUser.email,
                     subject: "Your account has been suspended",
@@ -206,6 +197,23 @@ class UserModel {
         } catch (e) {
             console.error(e);
             throw e;
+        }
+    }
+
+    public async GetUserById(userId: number): Promise<User | null> {
+        try {
+            const user = await runQuery<User>(getUserByIdQuery, [
+                userId
+            ]);
+
+            if (user.rowCount !== 1) {
+                return null;
+            }
+
+            return this._decryptUser(user.rows[0]);
+        } catch(e) {
+            console.error(e);
+            return null;
         }
     }
 
