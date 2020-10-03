@@ -8,6 +8,8 @@ import { ApiRequest } from "..";
 import forceAdminMiddleware from "../middleware/forceAdminMiddleware";
 import sendEmail from "../Models/emailModel";
 import forceLoginMiddleware from "../middleware/forceLoginMiddleware";
+import notificationModel from "../Models/notificationModel";
+import checkBannedMiddleware from "../middleware/checkBannedMiddleware";
 
 const validator = createValidator();
 
@@ -180,6 +182,15 @@ async function contactUser (req: ApiRequest<{message: string, phone: boolean, em
             subject: "You have a new message",
             body: body
         });
+        
+        const notification =
+        {   user_id: receiver.id,
+            message: "You have a new message. Please check your email.",
+            link: "",
+            read: false
+        };
+
+        notificationModel.InsertNotification(notification);
 
         res.sendStatus(200);
        
@@ -338,6 +349,6 @@ userController.patch("/:id", forceAdminMiddleware, validator.params(updateUserPa
  * @return {string} 401 - Unauthorized
  * @security BearerToken
  */
-userController.post("/:id/contact", validator.params(contactUserParamsSchema), validator.body(contactUserBodySchema), forceLoginMiddleware, contactUser);
+userController.post("/:id/contact", validator.params(contactUserParamsSchema), validator.body(contactUserBodySchema), forceLoginMiddleware, checkBannedMiddleware, contactUser);
 
 export default userController;

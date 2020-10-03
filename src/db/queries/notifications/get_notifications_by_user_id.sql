@@ -1,0 +1,1 @@
+select * from notifications where user_id = $1 order by publication_date DESC;

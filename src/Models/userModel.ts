@@ -12,6 +12,7 @@ import resetPasswordQuery from '../db/queries/users/reset_password';
 import sendEmail from './emailModel';
 import fs from "fs";
 import path from "path";
+import notificationModel from './notificationModel';
 
 const getUserByIdQuery = fs.readFileSync(path.resolve(__dirname, '../db/queries/users/get_user_by_id.sql'), "utf8");
 const getUserByUsernameOrEmailQuery = fs.readFileSync(path.resolve(__dirname, '../db/queries/users/get_user_by_username_or_email.sql'), "utf8");
@@ -186,7 +187,16 @@ class UserModel {
                     subject: "Your account has been suspended",
                     body: `<p>Hi ${updatedUser.name} ${updatedUser.surname},<p>After reviewing your content, we decided to block your account. You will not be able to upload more content, but you can still access and view the website. We are truly sorry to take this action, we hope you can understand the reasons.</p> <p>Best wishes, <br/>Where is my Pet team</p>`
                 });
+                const notification =
+                {   user_id: user.id,
+                    message: "Your account has been suspended. Please check your email for more details.",
+                    link: "",
+                    read: false
+                };
+        
+                notificationModel.InsertNotification(notification);
             }
+
 
             await runQuery<User>(updateUserQuery,
             [
