@@ -12,6 +12,7 @@ import imageRecognitionController from './Controllers/imageRecognitionController
 import compression from 'compression';
 import expressJSDocSwagger from 'express-jsdoc-swagger';
 import swaggerConfig from './swagger.config';
+import notificationController from './Controllers/notificationController';
 
 const app = express();
 expressJSDocSwagger(app)(swaggerConfig);
@@ -41,3 +42,4 @@ app.use("/animals", animalController);
 app.use("/species", speciesController);
 app.use("/breeds", breedController);
 app.use("/image-recognition", imageRecognitionController);
+app.use("/notifications", notificationController);

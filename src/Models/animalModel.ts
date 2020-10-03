@@ -11,6 +11,7 @@ import imageRecognitionModel from "./imageRecognitionModel";
 import sendEmail from "./emailModel";
 import CustomError, { ErrorType } from "./customErrors";
 import userModel from "./userModel";
+import notificationModel from "./notificationModel";
 
 const insertAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal.sql"), "utf8");
 const insertAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal_image.sql"), "utf8");
@@ -49,6 +50,16 @@ class AnimalModel {
                 subject: "Suspicious content",
                 body: `<p>Hi ${user.name} ${user.surname},<p>Your content will be published once it has been evaluated by our team. Thanks for understanding.</p> <p>Best wishes, <br/>Where is my Pet team</p>`
             });
+
+            const notification =
+            {   user_id: user.id,
+                message: "Your animal has been flagged as suspicious content. Please check your email for more details.",
+                link: "",
+                read: false
+            };
+    
+            notificationModel.InsertNotification(notification);
+
             user.status = "Suspicious";
             await userModel.UpdateUser(user.id, user);
         }
@@ -93,6 +104,17 @@ class AnimalModel {
                 await runQuery(deleteAnimalQuery, [animalId]);
                 throw e;
             }
+
+            if (!unsafeContent) {
+                const notification =
+                {   user_id: user.id,
+                    message: "Your animal has been registered.",
+                    link: `/view-animal/${animalId}`,
+                    read: false
+                };
+                notificationModel.InsertNotification(notification);
+            }
+    
 
             return animalId;
         } catch(e) {
@@ -148,6 +170,16 @@ class AnimalModel {
                 updatedAnimal.recovered
             ]
         ); 
+
+        const notification =
+        {   user_id: updatedAnimal.user_id,
+            message: "Your animal has been marked as recovered.",
+            link: `/view-animal/${updatedAnimal.id}`,
+            read: false
+        };
+
+        notificationModel.InsertNotification(notification);
+
         } catch (e) {
             console.error(e);
             throw e;

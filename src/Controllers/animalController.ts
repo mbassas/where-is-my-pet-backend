@@ -7,6 +7,7 @@ import CustomError, { ErrorType } from "../Models/customErrors";
 import { ApiRequest } from "..";
 import forceLoginMiddleware from "../middleware/forceLoginMiddleware";
 import multer from "multer";
+import checkBannedMiddleware from "../middleware/checkBannedMiddleware";
 
 const validator = createValidator();
 const upload = multer({dest: "uploads/"});
@@ -200,7 +201,7 @@ async function updateAnimal (req: ApiRequest<Partial<Animal>>, res: Response) {
   * @return {string} 403 - Forbidden
   * @security BearerToken
   */
-animalController.post("/", forceLoginMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
+animalController.post("/", forceLoginMiddleware, checkBannedMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
 
 /**
  * GET /animals/{id} 
@@ -223,7 +224,7 @@ animalController.get("/:id", validator.params(getAnimalByIdParamsSchema), getAni
  * @return {string} 401 - Unauthorized
  * @security BearerToken
  */
-animalController.patch("/:id", forceLoginMiddleware, validator.params(updateAnimalParamsSchema), validator.body(updateAnimalBodySchema), updateAnimal);
+animalController.patch("/:id", forceLoginMiddleware, checkBannedMiddleware, validator.params(updateAnimalParamsSchema), validator.body(updateAnimalBodySchema), updateAnimal);
 
 /**
  * GET /animals/{id}/{imageName}.png
