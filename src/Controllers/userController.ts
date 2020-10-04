@@ -346,6 +346,7 @@ userController.patch("/:id", forceAdminMiddleware, validator.params(updateUserPa
  * @param {ContactParams} request.body.required
  * @return {Empty} 200 - Success
  * @return {string} 404 - Not found
+ * @return {string} 403 - Not found
  * @return {string} 401 - Unauthorized
  * @security BearerToken
  */

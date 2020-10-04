@@ -268,6 +268,7 @@ animalController.get("/:id/:imageName.png", validator.params(getAnimalImageParam
 
 /**
  * GET /animals
+ * @summary Search animals using filters
  * @tags Animals
  * @param {integer} start.query
  * @param {integer} count.query
