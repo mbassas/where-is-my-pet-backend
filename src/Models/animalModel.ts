@@ -18,6 +18,7 @@ const insertAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/qu
 const getAnimalByIdQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/get_animal_by_id.sql"), "utf8");
 const getAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/get_animal_image.sql"), "utf8");
 const deleteAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/delete_animal_by_id.sql"), "utf8");
+const getAnimalsByUserIdQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/get_animals_by_user_id.sql"), "utf8");
 
 class AnimalModel {
 
@@ -186,6 +187,14 @@ class AnimalModel {
         }
        
     };
+
+    public async GetAnimalsByUserId(userId: number): Promise<Animal[]> {
+        const queryResult = await runQuery<Animal>(getAnimalsByUserIdQuery, [
+            userId
+        ]);
+
+        return queryResult.rows;
+    }
 }
 
 export default new AnimalModel();
