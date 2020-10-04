@@ -160,8 +160,20 @@ async function updateAnimal (req: ApiRequest<Partial<Animal>>, res: Response) {
             res.sendStatus(500);
         }
     }
-
 };
+
+async function getAnimalsByUserId(req: ApiRequest, res: Response) {
+    try {
+        const animals = await animalModel.GetAnimalsByUserId(req.user.id);
+        res.send(animals);
+    } catch (e) {
+        if (e instanceof CustomError) {
+            res.status(e.getHttpStatusCode()).send(e.getMessage());
+        } else {
+            res.sendStatus(500);
+        }
+    }
+}
 
 /**
  * Type definitions for this Controller
@@ -202,6 +214,16 @@ async function updateAnimal (req: ApiRequest<Partial<Animal>>, res: Response) {
   * @security BearerToken
   */
 animalController.post("/", forceLoginMiddleware, checkBannedMiddleware, upload.array("images"), validator.body(createAnimalBodySchema), createAnimal);
+
+/**
+ * GET /animals/uploaded
+ * @tags Animals
+ * @summary Returns all animals uploaded by the authenticated user
+ * @return {array<Animal>} 200 - Success
+ * @return {string} 401 - Unauthorized
+ * @security BearerToken
+ */
+animalController.get("/uploaded", forceLoginMiddleware, getAnimalsByUserId);
 
 /**
  * GET /animals/{id} 
