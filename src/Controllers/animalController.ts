@@ -8,6 +8,7 @@ import { ApiRequest } from "..";
 import forceLoginMiddleware from "../middleware/forceLoginMiddleware";
 import multer from "multer";
 import checkBannedMiddleware from "../middleware/checkBannedMiddleware";
+import bookmarkModel from "../Models/bookmarkModel";
 
 const validator = createValidator();
 const upload = multer({dest: "uploads/"});
@@ -73,9 +74,14 @@ async function getAnimalImage({params}: ApiRequest, res: Response) {
 const getAnimalByIdParamsSchema = Joi.object({
     id: Joi.number().integer().required(),
 });
-async function getAnimalById({ params }: ApiRequest, res: Response) {
+async function getAnimalById({ params, user }: ApiRequest, res: Response) {
     try {
         const animal = await animalModel.GetAnimalById(parseInt(params.id));
+        if (user) {
+            const animalIdBookmarks = await bookmarkModel.GetAnimalIdsByUserId(user.id);
+
+            animal.bookmark = animalIdBookmarks.includes(animal.id);
+        }
         res.send(animal);
     } catch (e) {
         if (e instanceof CustomError) {
@@ -95,7 +101,7 @@ const getAnimalsQuerySchema = Joi.object({
     lat: Joi.number(),
     lng: Joi.number(),
 });
-async function getAnimals({ query }: ApiRequest, res: Response) {
+async function getAnimals({ query, user }: ApiRequest, res: Response) {
     const start = parseInt(query.start);
     const count = parseInt(query.count);
     const species = query.species;
@@ -113,7 +119,7 @@ async function getAnimals({ query }: ApiRequest, res: Response) {
             lat: lat || undefined,
             lng: lng || undefined,
             status: status || undefined
-        });
+        }, user?.id);
         res.send(animals);
     } catch (e) {
         if (e instanceof CustomError) {
@@ -244,6 +250,7 @@ animalController.get("/:id", validator.params(getAnimalByIdParamsSchema), getAni
  * @return {Empty} 200 - Success
  * @return {string} 404 - Not found
  * @return {string} 401 - Unauthorized
+ * @return {string} 403 - Forbidden
  * @security BearerToken
  */
 animalController.patch("/:id", forceLoginMiddleware, checkBannedMiddleware, validator.params(updateAnimalParamsSchema), validator.body(updateAnimalBodySchema), updateAnimal);
@@ -270,6 +277,7 @@ animalController.get("/:id/:imageName.png", validator.params(getAnimalImageParam
  * @param {number} lat.query
  * @param {number} lng.query
  * @return {array<Animal>} 200 - Success
+ * @security BearerToken
  */
 animalController.get("/", validator.query(getAnimalsQuerySchema), getAnimals);
 
