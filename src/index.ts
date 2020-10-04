@@ -13,6 +13,7 @@ import compression from 'compression';
 import expressJSDocSwagger from 'express-jsdoc-swagger';
 import swaggerConfig from './swagger.config';
 import notificationController from './Controllers/notificationController';
+import bookmarkController from './Controllers/bookmarkController';
 
 const app = express();
 expressJSDocSwagger(app)(swaggerConfig);
@@ -43,3 +44,4 @@ app.use("/species", speciesController);
 app.use("/breeds", breedController);
 app.use("/image-recognition", imageRecognitionController);
 app.use("/notifications", notificationController);
+app.use("/bookmarks", bookmarkController);

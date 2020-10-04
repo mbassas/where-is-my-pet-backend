@@ -18,6 +18,7 @@ export interface Animal extends AnimalInput {
     location_id: any;
     id: number;
     user_id: number;
+    bookmark?: boolean;
     publication_date: string;
 }
 

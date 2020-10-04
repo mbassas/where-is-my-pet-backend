@@ -12,6 +12,7 @@ import sendEmail from "./emailModel";
 import CustomError, { ErrorType } from "./customErrors";
 import userModel from "./userModel";
 import notificationModel from "./notificationModel";
+import bookmarkModel from "./bookmarkModel";
 
 const insertAnimalQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal.sql"), "utf8");
 const insertAnimalImageQuery = fs.readFileSync(path.resolve(__dirname, "../db/queries/animals/insert_animal_image.sql"), "utf8");
@@ -33,10 +34,19 @@ class AnimalModel {
         return queryResult.rows[0];
     };
 
-    public async GetAnimals(params: IGetAnimalQueryParams): Promise<Animal[]> {
+    public async GetAnimals(params: IGetAnimalQueryParams, userId?: number): Promise<Animal[]> {
         const queryResult = await runQuery<Animal>(getAnimalsQuery(params));
 
-        return queryResult.rows;
+        let animals = queryResult.rows;
+        if (userId) {
+            const bookmarks = await bookmarkModel.GetAnimalIdsByUserId(userId);
+
+            for (const animal of animals) {
+                animal.bookmark = bookmarks.includes(animal.id);
+            }
+        }
+
+        return animals;
     }
 
     public async CreateAnimal(user: User, animal: AnimalInput, animalImages: Express.Multer.File[], imagePath: string ): Promise<number> {
@@ -59,7 +69,7 @@ class AnimalModel {
                 read: false
             };
     
-            notificationModel.InsertNotification(notification);
+            await notificationModel.InsertNotification(notification);
 
             user.status = "Suspicious";
             await userModel.UpdateUser(user.id, user);
@@ -113,7 +123,7 @@ class AnimalModel {
                     link: `/view-animal/${animalId}`,
                     read: false
                 };
-                notificationModel.InsertNotification(notification);
+                await notificationModel.InsertNotification(notification);
             }
     
 
