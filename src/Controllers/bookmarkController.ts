@@ -96,7 +96,7 @@ bookmarkController.delete("/:animalId", forceLoginMiddleware, checkBannedMiddlew
 
 /**
  * GET /bookmarks
- * @summary Get all bookmarked animals for the current user
+ * @summary Gets all bookmarked animals for the current user
  * @tags Bookmarks
  * @return {array<Animal>} 200 - Success
  * @return {string} 401 - Unauthorized 

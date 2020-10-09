@@ -62,20 +62,25 @@ async function updateNotification(req: ApiRequest<Partial<Notification>>, res: R
  * 
  * @typedef {object} Notification
  * @property {number} id.required
- * @property {number} userId.required 
+ * @property {number} user_id.required 
  * @property {string} message.required
  * @property {string} link.required
  * @property {boolean} read.required
- * @property {string} publicationDate.required
+ * @property {string} publication_date.required
  */
 
 /**
 * @typedef {undefined} Empty
 */
 
+  /** 
+ * @typedef {object} UpdateNotification
+ * @property {boolean} read.required 
+ */
+
 /**
  * GET /notifications 
- * @summary Returns all notifications of an specific user
+ * @summary Returns all notifications of a specific user
  * @tags Notification
  * @return {array<Notification>} 200 - Success
  * @return {string} 401 - Unauthorized
@@ -84,10 +89,11 @@ async function updateNotification(req: ApiRequest<Partial<Notification>>, res: R
 notificationController.get("/", forceLoginMiddleware, getNotifications);
 
 /**
- * PATCH /notifications
+ * PATCH /notifications/{id}
  * @summary Updates a notification
  * @tags Notification
  * @param {number} id.path
+ * @param {UpdateNotification} request.body.required
  * @return {Empty} 200 - Success
  * @return {string} 404 - Not found
  * @return {string} 401 - Unauthorized

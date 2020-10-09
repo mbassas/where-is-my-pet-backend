@@ -207,13 +207,23 @@ async function contactUser (req: ApiRequest<{message: string, phone: boolean, em
  * Type definitions for this Controller
  * 
  * @typedef {object} User
- * @property {string} name.required
- * @property {string} surname.required
- * @property {string} email.required
- * @property {string} phone.required
- * @property {string} username.required
- * @property {string} password.required
+ * @property {string} name
+ * @property {number} id
+ * @property {string} surname
+ * @property {string} email
+ * @property {string} phone
+ * @property {string} username
  */
+
+/**
+* @typedef {object} UserInfo
+* @property {string} name
+* @property {string} surname
+* @property {string} username
+* @property {number} id
+* @property {string} status
+* @property {array<string>} roles
+*/
 
  /** 
  * @typedef {object} SignUpParams
@@ -263,11 +273,24 @@ async function contactUser (req: ApiRequest<{message: string, phone: boolean, em
   * @property {string} message.required
   */
 
+/** 
+ * @typedef {object} UpdateUser
+ * @property {string} status.required 
+ */
+
+/** 
+ * @typedef {object} ByStatusResponse
+ * @property {number} id.required 
+ * @property {string} username.required 
+ * @property {string} status.required 
+ */
+
+
 /**
  * GET /users
  * @tags Users
- * @summary Returns currently logged in use info 
- * @return {User} 200 - Success
+ * @summary Returns current logged in user info
+ * @return {UserInfo} 200 - Success
  * @return {Empty} 204 - User not logged in
  * @security BearerToken
  */
@@ -318,7 +341,7 @@ userController.post("/reset-password", validator.body(resetPasswordBodySchema), 
  * @summary Returns users by status
  * @tags Users
  * @param {string} status.query
- * @return {array<User>} 200 - Success
+ * @return {array<ByStatusResponse>} 200 - Success
  * @return {string} 403 - Forbidden
  * @return {string} 401 - Unauthorized
  * @security BearerToken
@@ -329,7 +352,8 @@ userController.get("/by-status", forceAdminMiddleware, validator.query(getUsersB
  * PATCH /users/{id}
  * @summary Updates a user
  * @tags Users
- * @param {number} id.path
+ * @param {number} id.path 
+ * @param {UpdateUser} request.body.required
  * @return {Empty} 200 - Success
  * @return {string} 404 - Not found
  * @return {string} 403 - Forbidden
@@ -340,13 +364,13 @@ userController.patch("/:id", forceAdminMiddleware, validator.params(updateUserPa
 
 /**
  * POST /users/{id}/contact
- * @summary Send email to a user
+ * @summary Sends email to a user
  * @tags Users
  * @param {number} id.path
  * @param {ContactParams} request.body.required
  * @return {Empty} 200 - Success
  * @return {string} 404 - Not found
- * @return {string} 403 - Not found
+ * @return {string} 403 - Forbidden
  * @return {string} 401 - Unauthorized
  * @security BearerToken
  */

@@ -35,11 +35,17 @@ async function getAnimalInfo (req: ApiRequest, res: Response) {
  */
 
 /**
+ * @typedef {object} ImageRecognitionResponse
+ * @property {string} species.required
+ * @property {string} breed.required 
+ */
+
+/**
  * POST /image-recognition
  * @tags Image Recognition
  * @summary Gets animal info by image recognition
  * @param {ImageRecognitionParams} request.body.required - Body - multipart/form-data
- * @return {Animal} 200 - Success
+ * @return {ImageRecognitionResponse} 200 - Success
  * @return {string} 400 - Images is required
  */
 imageRecognitionController.post("/", upload.single("image"), getAnimalInfo);

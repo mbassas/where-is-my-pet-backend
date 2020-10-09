@@ -184,7 +184,7 @@ async function getAnimalsByUserId(req: ApiRequest, res: Response) {
 /**
  * Type definitions for this Controller
  * 
- * @typedef {object} Animal
+ * @typedef {object} AnimalInput
  * @property {string} status.required - enum:LOST,FOUND
  * @property {string} species.required - enum:CAT,DOG,OTHER
  * @property {string} breed
@@ -199,6 +199,29 @@ async function getAnimalsByUserId(req: ApiRequest, res: Response) {
  * @property {string} images.required - The animal image - binary
  */
 
+/**
+* @typedef {object} Animal
+* @property {number} id 
+* @property {string} species 
+* @property {string} breed
+* @property {string} status
+* @property {string} size 
+* @property {string} color
+* @property {string} name
+* @property {string} gender 
+* @property {number} age
+* @property {number} lat
+* @property {number} lng
+* @property {string} location   
+* @property {boolean} recovered
+* @property {string} image_name
+* @property {boolean} published
+* @property {string} publication_date
+* @property {number} user_id
+* @property {number} location_id 
+* @property {boolean} bookmark
+*/
+
 /** 
  * @typedef {object} CreateAnimalResponse
  * @property {number} id
@@ -212,7 +235,7 @@ async function getAnimalsByUserId(req: ApiRequest, res: Response) {
   * POST /animals
   * @summary Creates a new animal
   * @tags Animals
-  * @param {Animal} request.body.required - The Animal - multipart/form-data
+  * @param {AnimalInput} request.body.required - The Animal - multipart/form-data
   * @return {CreateAnimalResponse} 201 - Created
   * @return {string} 400 - Images is required
   * @return {string} 401 - Unauthorized
@@ -238,6 +261,7 @@ animalController.get("/uploaded", forceLoginMiddleware, getAnimalsByUserId);
  * @param {number} id.path
  * @return {Animal} 200 - Success
  * @return {string} 404 - Not found
+ * @security BearerToken
  */
 animalController.get("/:id", validator.params(getAnimalByIdParamsSchema), getAnimalById);
 
