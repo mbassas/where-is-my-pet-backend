@@ -23,7 +23,7 @@ const createAnimalBodySchema = Joi.object({
     color: Joi.string(),
     name: Joi.string(),
     gender: Joi.string(),
-    age: Joi.number(),
+    age: Joi.number().integer(),
     lat: Joi.number().required(),
     lng: Joi.number().required(),
     location: Joi.string().required()

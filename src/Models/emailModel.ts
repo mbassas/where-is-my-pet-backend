@@ -9,6 +9,11 @@ interface IProps {
 }
 
 function sendEmail({ destinationEmail, subject, body }: IProps): Promise<void> {
+    if(!Config.EMAIL_USER || !Config.EMAIL_PASSWORD)
+    {
+        console.warn("Missing email configuration. Not sending email");
+        return;
+    }
     let transporter = nodeMailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
