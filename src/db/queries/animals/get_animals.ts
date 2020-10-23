@@ -71,6 +71,8 @@ WHERE
 
     if (lat && lng) {
         query += `\nORDER BY distance ASC`
+    } else {
+        query += `\nORDER BY a.id DESC`
     }
 
     query += `\nLIMIT ${count} OFFSET ${start}`;
