@@ -32,7 +32,7 @@
     "nodemailer": "^6.4.6",
     "pg": "^7.18.2",
     "pg-large-object": "^2.0.0",
-    "sharp": "^0.25.2",
+    "sharp": "^0.30.5",
     "string-similarity": "^4.0.2",
     "uuid": "^7.0.3"
   },
