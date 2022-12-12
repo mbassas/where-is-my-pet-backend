@@ -23,7 +23,7 @@
     "db-migrate": "^0.11.11",
     "db-migrate-pg": "^1.0.0",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-joi-validation": "^4.0.3",
     "express-jsdoc-swagger": "^1.0.5",
     "jsonwebtoken": "^8.5.1",
